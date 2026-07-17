@@ -1267,11 +1267,6 @@ function importBackup(){
             renderDaftarLokasi();
             render();
 
-            document.getElementById(
-                "targetInput"
-            ).value =
-                TARGET_BULANAN;
-
             alert(
                 "Backup berhasil dipulihkan"
             );
@@ -1324,10 +1319,7 @@ window.onload = function(){
     ).value =
         `${yyyy}-${mm}-${dd}`;
 
-    document.getElementById(
-        "targetInput"
-    ).value =
-        TARGET_BULANAN;
+    
 
     renderLokasi();
     renderDaftarLokasi();
