@@ -894,38 +894,7 @@ function render(){
     ).innerText =
         progress.toFixed(1) + "%";
 
-    // ===== PREDIKSI =====
 
-    const jumlahHariKerja =
-        new Set(
-            db.map(x => x.tanggal)
-        ).size;
-
-    const rataRata =
-        jumlahHariKerja
-        ? totalGaji / jumlahHariKerja
-        : 0;
-
-    const sekarang =
-        new Date();
-
-    const jumlahHariBulan =
-        new Date(
-            sekarang.getFullYear(),
-            sekarang.getMonth() + 1,
-            0
-        ).getDate();
-
-    const prediksi =
-        rataRata * jumlahHariBulan;
-
-    document.getElementById(
-        "prediksiText"
-    ).innerText =
-        yen(Math.round(prediksi));
-
-    renderKalender(dataPerTanggal);
-}
 // ===== TANGGAL HARI INI =====
 function renderKalender(dataPerTanggal){
 
