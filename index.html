@@ -22,53 +22,46 @@ href="icon-192.png">
         <p>Pengelola Gaji & Absensi</p>
     </header>
 
-    <section class="card dashboard">
+ <section class="card dashboard">
 
-        <h2>Pendapatan Bulan Ini</h2>
+    <h2 id="judulBulan">💰 Pendapatan Bulan Ini</h2>
 
-        <div id="totalGaji" class="total">
-            ¥0
+    <div id="totalGaji" class="total">
+        ¥0
+    </div>
+
+    <div class="target-box">
+
+        <div style="font-size:16px;font-weight:bold;">
+            🎯 Target Bulanan
         </div>
 
-        <div class="target-box">
-            <div>
-                Target:
-                <span id="targetText">¥250,000</span>
-            </div>
-
-            <div class="progress">
-                <div id="progressBar"></div>
-            </div>
-
-            <div id="progressText">
-                0%
-            </div>
+        <div id="targetText"
+             style="font-size:22px;margin:10px 0;">
+            ¥250,000
         </div>
-<div style="margin-top:15px">
 
-    <input
-        type="number"
-        id="targetInput"
-        placeholder="Masukkan target gaji">
+        <div class="progress">
+            <div id="progressBar"></div>
+        </div>
 
-    <button
-        onclick="simpanTarget()">
+        <div id="progressText"
+             style="margin-top:8px;">
+            0%
+        </div>
 
-        Simpan Target
+    </div>
 
+    <div style="margin-top:20px;text-align:center;">
+
+    <button onclick="ubahTarget()">
+        ✏️ Ubah Target
     </button>
 
 </div>
-        <div class="prediksi">
-            Prediksi Bulan Ini:
-            <span id="prediksiText">¥0</span>
-        </div>
-<button
-id="installBtn"
-style="display:none;">
-Install App
-</button>
-    </section>
+
+
+</section>
 
     <section class="card">
 
@@ -148,6 +141,13 @@ Install App
     <div id="statistik">
 
     </div>
+
+</section>
+    <section class="card">
+
+    <h2>📊 Ringkasan Keseluruhan</h2>
+
+    <div id="ringkasanTotal"></div>
 
 </section>
 <section class="card">
@@ -315,6 +315,15 @@ if("serviceWorker" in navigator){
 }
 
 </script>
+    <div style="text-align:center;margin:30px 0;">
+
+    <button
+        id="installBtn"
+        style="display:none;">
+        📲 Install GajiKu Jepang
+    </button>
+
+</div>
 <footer
 style="
 text-align:center;
