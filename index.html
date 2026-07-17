@@ -1,290 +1,298 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GajiKu Jepang</title>
 
-<link
-rel="apple-touch-icon"
-href="icon-192.png">
-    <link rel="stylesheet" href="style.css">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>💼 GajiKu Jepang</title>
+
+<link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
+
+<link rel="apple-touch-icon" href="icon-192.png">
+
 <meta name="theme-color" content="#111827">
+
 </head>
 
 <body>
 
 <div class="container">
 
-    <header>
-        <h1>💼 GajiKu Jepang</h1>
-        <p>Pengelola Gaji & Absensi</p>
-    </header>
+<header>
 
- <section class="card dashboard">
+<h1>💼 GajiKu Jepang</h1>
 
-    <h2 id="judulBulan">💰 Pendapatan Bulan Ini</h2>
+<p>Pengelola Gaji & Absensi</p>
 
-    <div id="totalGaji" class="total">
-        ¥0
-    </div>
+</header>
 
-    <div class="target-box">
+<!-- DASHBOARD -->
 
-        <div style="font-size:16px;font-weight:bold;">
-            🎯 Target Bulanan
-        </div>
+<section class="card dashboard">
 
-        <div id="targetText"
-             style="font-size:22px;margin:10px 0;">
-            ¥250,000
-        </div>
+<h2 id="judulBulan">
+💴 Pendapatan Bulan Ini
+</h2>
 
-        <div class="progress">
-            <div id="progressBar"></div>
-        </div>
+<div id="totalGaji" class="total">
+¥0
+</div>
 
-        <div id="progressText"
-             style="margin-top:8px;">
-            0%
-        </div>
+<div class="target-box">
 
-    </div>
+<h3>🎯 Target Bulanan</h3>
 
-    <div style="margin-top:20px;text-align:center;">
+<div id="targetText">
+¥250,000
+</div>
 
-    <button onclick="ubahTarget()">
-        ✏️ Ubah Target
-    </button>
+<div class="progress">
+
+<div id="progressBar"></div>
 
 </div>
 
+<p id="progressText">
+0%
+</p>
+
+<button onclick="ubahTarget()">
+✏️ Ubah Target
+</button>
+
+</div>
 
 </section>
 
-    <section class="card">
-
-    <h2>📍 Kelola Lokasi</h2>
-
-    <input
-        type="text"
-        id="namaLokasi"
-        placeholder="Nama lokasi">
-
-    <input
-        type="number"
-        id="tarifLokasi"
-        placeholder="Tarif">
-
-    <select id="jenisLokasi">
-
-        <option value="kamar">
-            Per Kamar
-        </option>
-
-        <option value="jam">
-            Per Jam
-        </option>
-
-        <option value="borongan">
-            Borongan
-        </option>
-
-    </select>
-
-    <button onclick="tambahLokasi()">
-        Tambah Lokasi
-    </button>
-
-    <div
-        id="daftarLokasi"
-        style="margin-top:15px;">
-    </div>
-
-</section>
+<!-- INPUT -->
 
 <section class="card">
 
-    <h2>Input Kerja</h2>
-
-    <input type="date" id="tanggal">
-
-    <select id="lokasi">
-    </select>
-
-    <input
-        type="number"
-        step="0.1"
-        id="jumlah"
-        placeholder="Jumlah kamar atau jam">
-
-    <button onclick="tambahData()">
-        Simpan Data
-    </button>
-
-</section>
-
-<section class="card">
-
-    <h2>Rekap Lokasi</h2>
-
-    <div id="rekapLokasi">
-
-    </div>
-
-    </section>
-<section class="card">
-
-    <h2>📊 Statistik</h2>
-
-    <div id="statistik">
-
-    </div>
-
-</section>
-    <section class="card">
-
-    <h2>📊 Ringkasan Keseluruhan</h2>
-
-    <div id="ringkasanTotal"></div>
-
-</section>
-<section class="card">
-
-    <h2>💰 Pengeluaran & Tabungan</h2>
-
-    <div style="margin-bottom:15px">
-
-        <input
-            type="text"
-            id="namaPengeluaran"
-            placeholder="Contoh: Makan">
-
-        <input
-            type="number"
-            id="jumlahPengeluaran"
-            placeholder="Jumlah Yen">
-
-        <button
-            onclick="tambahPengeluaran()">
-
-            Tambah Pengeluaran
-
-        </button>
-
-    </div>
-
-    <div id="daftarPengeluaran"></div>
-
-    <hr style="margin:15px 0">
-
-    <div id="ringkasanKeuangan"></div>
-
-</section>
-<section class="card">
-
-    <h2>💾 Backup & Restore</h2>
-
-    <button onclick="exportBackup()">
-        Export Backup
-    </button>
-
-    <hr style="margin:15px 0">
-
-    <input
-        type="file"
-        id="importFile"
-        accept=".json">
-
-    <button onclick="importBackup()">
-        Import Backup
-    </button>
-
-</section>
-<section class="card">
-
-    <h2>📅 Rekap Bulanan</h2>
-
-    <div id="rekapBulanan"></div>
-
-</section>
-    <section class="card">
-
-    <h2>🗓️ Kalender Bulanan</h2>
-
-    <div
-    id="kalender"
-    class="kalender-grid">
-    </div>
-
-    <div
-    id="detailTanggal"
-    style="
-    display:none;
-    margin-top:15px;
-    padding:15px;
-    background:#1f2937;
-    border-radius:12px;
-    ">
-    </div>
-
-</section>
-
-<section class="card">
-
-   <h2>Riwayat Kerja</h2>
+<h2>📝 Input Kerja</h2>
 
 <input
-    type="month"
-    id="filterBulan"
-    onchange="render()"
-    style="margin-bottom:15px;">
+type="date"
+id="tanggal">
 
-    <div id="riwayat">
-    </div>
+<select id="lokasi"></select>
+
+<input
+type="number"
+step="0.1"
+id="jumlah"
+placeholder="Jumlah kamar / jam">
+
+<button onclick="tambahData()">
+💾 Simpan
+</button>
+
+</section>
+
+<!-- LOKASI -->
+
+<section class="card">
+
+<h2>📍 Kelola Lokasi</h2>
+
+<input
+type="text"
+id="namaLokasi"
+placeholder="Nama Lokasi">
+
+<input
+type="number"
+id="tarifLokasi"
+placeholder="Tarif">
+
+<select id="jenisLokasi">
+
+<option value="kamar">
+Per Kamar
+</option>
+
+<option value="jam">
+Per Jam
+</option>
+
+<option value="borongan">
+Borongan
+</option>
+
+</select>
+
+<button onclick="tambahLokasi()">
+Tambah Lokasi
+</button>
+
+<div id="daftarLokasi"></div>
+
+</section>
+
+<!-- REKAP -->
+
+<section class="card">
+
+<h2>📊 Rekap Lokasi</h2>
+
+<div id="rekapLokasi"></div>
+
+</section>
+
+<!-- STATISTIK -->
+
+<section class="card">
+
+<h2>📈 Statistik</h2>
+
+<div id="statistik"></div>
+
+</section>
+
+<!-- PENGELUARAN -->
+
+<section class="card">
+
+<h2>💰 Pengeluaran</h2>
+
+<input
+type="text"
+id="namaPengeluaran"
+placeholder="Nama">
+
+<input
+type="number"
+id="jumlahPengeluaran"
+placeholder="Jumlah">
+
+<button onclick="tambahPengeluaran()">
+Tambah
+</button>
+
+<div id="daftarPengeluaran"></div>
+
+<hr>
+
+<div id="ringkasanKeuangan"></div>
+
+</section>
+
+<!-- REKAP BULAN -->
+
+<section class="card">
+
+<h2>📅 Rekap Bulanan</h2>
+
+<div id="rekapBulanan"></div>
+
+</section>
+
+<!-- KALENDER -->
+
+<section class="card">
+
+<h2>🗓️ Kalender</h2>
+
+<div
+id="kalender"
+class="kalender-grid">
+</div>
+
+<div
+id="detailTanggal"
+style="display:none;">
+</div>
+
+</section>
+
+<!-- RIWAYAT -->
+
+<section class="card">
+
+<h2>📂 Riwayat Kerja</h2>
+
+<input
+type="month"
+id="filterBulan"
+onchange="render()">
+
+<div id="riwayat"></div>
+
+</section>
+
+<!-- BACKUP -->
+
+<section class="card">
+
+<h2>💾 Backup & Restore</h2>
+
+<button onclick="exportBackup()">
+
+Export Backup
+
+</button>
+
+<hr>
+
+<input
+type="file"
+id="importFile"
+accept=".json">
+
+<button onclick="importBackup()">
+
+Import Backup
+
+</button>
 
 </section>
 
 </div>
+
+<!-- POPUP -->
+
 <div
 id="popupOverlay"
-onclick="closePopup()"
-style="
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.6);
-z-index:99998;
-">
+onclick="closePopup()">
 </div>
-<div
-id="popup"
-style="
-display:none;
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:#1f2937;
-color:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 0 20px rgba(0,0,0,.4);
-z-index:99999;
-width:90%;
-max-width:350px;
-">
-    <p id="popupText"></p>
 
-    <button onclick="closePopup()">
-        Tutup
-    </button>
+<div id="popup">
+
+<p id="popupText"></p>
+
+<button onclick="closePopup()">
+
+Tutup
+
+</button>
 
 </div>
+
+<!-- INSTALL -->
+
+<div class="install-box">
+
+<button
+id="installBtn"
+style="display:none;">
+
+📲 Install GajiKu Jepang
+
+</button>
+
+</div>
+
+<footer>
+
+💼 GajiKu Jepang
+
+<br>
+
+Design by Anamgambut
+
+</footer>
 
 <script src="app.js"></script>
 
@@ -292,63 +300,23 @@ max-width:350px;
 
 if("serviceWorker" in navigator){
 
-    navigator.serviceWorker
-    .register("./service-worker.js")
-
-    .then(()=>{
-
-        console.log(
-            "Service Worker aktif"
-        );
-
-    })
-
-    .catch(error=>{
-
-        console.error(
-            "SW Error:",
-            error
-        );
-
-    });
+navigator.serviceWorker.register("./service-worker.js");
 
 }
 
-</script>
-    <div style="text-align:center;margin:30px 0;">
+window.onerror=function(msg,url,line){
 
-    <button
-        id="installBtn"
-        style="display:none;">
-        📲 Install GajiKu Jepang
-    </button>
-
-</div>
-<footer
-style="
-text-align:center;
-padding:30px 10px;
-color:#34d399;
-font-size:14px;
-font-weight:bold;
-">
-
-    💼 GajiKu Jepang
-    <br>
-    Design by Anamgambut
-
-</footer>
-<script>
-window.onerror = function(msg,url,line){
-
-    alert(
-        "ERROR:\n" +
-        msg +
-        "\nBaris: " +
-        line
-    );
+alert(
+"ERROR\n\n"+
+msg+
+"\nBaris : "+
+line
+);
 
 };
+
 </script>
+
 </body>
+
 </html>
