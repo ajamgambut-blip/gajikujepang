@@ -232,23 +232,32 @@ function importBackup(){
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
-      db = JSON.parse(e.target.result);
+      let dataImport = JSON.parse(e.target.result);
 
-      // kasih default kalau ada yg kurang
-      if(!db.target) db.target = 250000;
-      if(!db.bahasa) db.bahasa = 'id';
-      if(!db.lokasi) db.lokasi = [];
-      if(!db.data) db.data = [];
+      // JAGA2 1: Kalau yg di backup cuma array data doang
+      if(Array.isArray(dataImport)){
+        dataImport = { data: dataImport, lokasi: db.lokasi, target: db.target, bahasa: db.bahasa };
+      }
+
+      // JAGA2 2: Kalau namanya beda "records" bukan "data"
+      if(dataImport.records &&!dataImport.data){
+        dataImport.data = dataImport.records;
+      }
+
+      db = {
+        data: dataImport.data || [],
+        lokasi: dataImport.lokasi || [],
+        target: dataImport.target || 250000,
+        bahasa: dataImport.bahasa || 'id'
+      };
 
       simpan();
       renderSemua();
-
-      // NOTE SUKSES
       alert('✅ Import berhasil! \nData 2 bulan kamu sudah kembali');
-      navigator.vibrate && navigator.vibrate(200); // getar 1x kalau HP support
+      navigator.vibrate && navigator.vibrate(200);
 
     } catch(err) {
-      alert('❌ Gagal import: ' + err.message)
+      alert('❌ Gagal import: File rusak. ' + err.message)
     }
   };
   reader.readAsText(file);
