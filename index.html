@@ -91,14 +91,14 @@
 <section class="card">
 <h2>🗓️ Kalender</h2>
 <div id="kalender" class="kalender-grid"></div>
-<div id="detailTanggal" style="display:none;"></div>
 </section>
 
-<!-- RIWAYAT -->
+<!-- RIWAYAT - DISEMBUNYIKAN DEFAULT -->
 <section class="card">
 <h2>📂 Riwayat Kerja</h2>
-<input type="month" id="filterBulan" onchange="render()">
-<div id="riwayat"></div>
+<input type="month" id="filterBulan" onchange="renderRiwayat()">
+<button onclick="toggleRiwayat()" id="btnToggleRiwayat">🔍 Lihat Semua Riwayat</button>
+<div id="riwayat" style="display:none;margin-top:10px"></div>
 </section>
 
 <!-- BACKUP -->
@@ -114,7 +114,7 @@
 
 <!-- POPUP -->
 <div id="popupOverlay" onclick="closePopup()"></div>
-<div id="popup">
+<div id="popup" style="max-height:80vh;overflow-y:auto">
 <p id="popupText"></p>
 <button onclick="closePopup()">Tutup</button>
 </div>
