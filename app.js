@@ -55,7 +55,7 @@ function tambahPengeluaran() {
 }
 
 function renderKalender() {
-  const grid = document.getElementById('kalenderGrid');
+  const grid = document.getElementById('kalender');
   grid.innerHTML = '';
   const d = new Date();
   const y = d.getFullYear(), m = d.getMonth();
