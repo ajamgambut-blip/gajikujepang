@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>💼 GajiKu Jepang</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=14">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#111827">
 </head>
@@ -44,8 +44,8 @@
 </section>
 
 <section class="card">
-  <h2 id="judulStatistik">📈 Statistik Bulan Ini</h2>
-  <div id="statistik"></div>
+  <h2 id="judulStatistik">📈 Statistik</h2>
+  <button onclick="openPopupStatistik()" style="background:#8b5cf6">📊 Lihat Detail Statistik</button>
 </section>
 
 <section class="card">
@@ -63,24 +63,22 @@
   <button onclick="ubahTarget()">✏️ Ubah Target</button>
 </section>
 
-<!-- CARD INPUT KERJA DIHAPUS, PINDAH KE POPUP -->
-
 <section class="card">
-  <h2 id="judulBackup">💾 Backup</h2>
+  <h2 id="judulBackup">💾 Backup & Data</h2>
   <div style="display:flex; gap:8px">
     <button onclick="exportBackup()">⬇️ Export</button>
     <button onclick="document.getElementById('importFile').click()" style="background:#3b82f6">⬆️ Import</button>
   </div>
   <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup()">
 
-  <h2 id="judulInput" style="margin-top:16px">📝 Kelola Data</h2>
+  <h2 id="judulInput" style="margin-top:16px">📝 Kelola Lokasi</h2>
   <button onclick="openPopupLokasi()" style="background:#3b82f6">➕ Tambah Lokasi</button>
-  <button onclick="openPopupDaftarLokasi()" style="background:#8b5cf6">👀 Lihat Daftar Lokasi</button>
+  <button onclick="openPopupDaftarLokasi()" style="background:#6366f1">👀 Lihat Daftar Lokasi</button>
 </section>
 
 </div>
 
-<!-- POPUP DETAIL BARU: ADA RINCIAN + TOMBOL TAMBAH -->
+<!-- POPUP DETAIL KALENDER + INPUT -->
 <div id="popupDetail" class="popup">
   <h3 id="judulDetail"></h3>
   <div id="isiDetail"></div>
@@ -88,20 +86,24 @@
   <button onclick="closePopupDetail()" class="btn-danger">Tutup</button>
 </div>
 
-<!-- POPUP INPUT BARU -->
 <div id="popupInput" class="popup">
   <h3 id="judulInputPopup">📝 Input Data</h3>
   <p id="inputTanggalText" style="color:#9ca3af; font-size:14px; margin-top:-8px"></p>
   <input type="hidden" id="inputTanggal">
-  <select id="inputLokasi">
-    <option value="">Pilih Lokasi</option>
-  </select>
+  <select id="inputLokasi"><option value="">Pilih Lokasi</option></select>
   <input type="number" inputmode="decimal" step="0.1" id="inputJumlah" placeholder="Jumlah kamar / jam">
   <button onclick="simpanDataDariPopup()">💾 Simpan</button>
   <button onclick="closePopupInput()" class="btn-danger">Batal</button>
 </div>
 
-<!-- POPUP LAINNYA TETEP -->
+<!-- POPUP STATISTIK BARU -->
+<div id="popupStatistik" class="popup">
+  <h3 id="judulStatistikPopup">📈 Statistik Bulan Ini</h3>
+  <div id="isiStatistikPopup"></div>
+  <button onclick="closePopupStatistik()" class="btn-danger">Tutup</button>
+</div>
+
+<!-- POPUP LAINNYA -->
 <div id="popupLokasi" class="popup">
   <h3 id="judulTambahLokasi">➕ Tambah Lokasi Baru</h3>
   <input type="text" id="namaLokasi" placeholder="Nama Lokasi">
@@ -139,6 +141,6 @@
 <div id="popupOverlay2" onclick="closeSemuaPopup()"></div>
 
 <footer>💼 GajiKu Jepang <br>Design by Anamgambut</footer>
-<script src="app.js?v=13"></script>
+<script src="app.js?v=14"></script>
 </body>
 </html>
