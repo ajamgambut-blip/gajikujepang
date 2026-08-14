@@ -12,8 +12,15 @@
 <div class="container">
 <header>
   <div class="header-top">
-    <div><h1>💼 GajiKu Jepang</h1><p id="subJudul">Pengelola Gaji & Absensi</p></div>
-    <select id="pilihBahasa" onchange="gantiBahasa()"><option value="id">🇮🇩</option><option value="en">🇬🇧</option><option value="jp">🇯🇵</option></select>
+    <div>
+      <h1>💼 GajiKu Jepang</h1>
+      <p id="subJudul">Pengelola Gaji & Absensi</p>
+    </div>
+    <select id="pilihBahasa" onchange="gantiBahasa()">
+      <option value="id">🇮🇩 ID</option>
+      <option value="en">🇬🇧 EN</option>
+      <option value="jp">🇯🇵 JP</option>
+    </select>
   </div>
 </header>
 
@@ -22,8 +29,10 @@
   <div id="totalGaji" class="total">¥0</div>
   <div id="totalSemua" style="font-size:12px;color:#9ca3af;margin-top:5px">Total Bulan Ini: ¥0</div>
   <div class="target-box">
-    <h3 id="judulTarget">🎯 Target Bulanan</h3><div id="targetText">¥250,000</div>
-    <div class="progress"><div id="progressBar"></div></div><p id="progressText">0%</p>
+    <h3 id="judulTarget">🎯 Target Bulanan</h3>
+    <div id="targetText">¥250,000</div>
+    <div class="progress"><div id="progressBar"></div></div>
+    <p id="progressText">0%</p>
     <button onclick="ubahTarget()">✏️ Ubah Target</button>
   </div>
 </section>
@@ -31,7 +40,9 @@
 <section class="card">
   <h2 id="judulInput">📝 Input Kerja</h2>
   <input type="date" id="tanggal">
-  <select id="lokasi"><option value="">Pilih Lokasi</option></select>
+  <select id="lokasi">
+    <option value="">Pilih Lokasi</option>
+  </select>
   <input type="number" inputmode="decimal" step="0.1" id="jumlah" placeholder="Jumlah kamar / jam">
   <button onclick="tambahData()">💾 Simpan</button>
   <button onclick="openPopupLokasi()" style="background:#3b82f6">➕ Tambah Lokasi</button>
@@ -71,15 +82,41 @@
 
 </div>
 
-<div id="popupLokasi" class="popup"><h3 id="judulTambahLokasi">➕ Tambah Lokasi Baru</h3>
-  <input type="text" id="namaLokasi" placeholder="Nama Lokasi"><input type="number" inputmode="numeric" id="tarifLokasi" placeholder="Tarif">
-  <select id="jenisLokasi"><option value="kamar">Per Kamar</option><option value="jam">Per Jam</option><option value="borongan">Borongan</option></select>
-  <button onclick="simpanLokasiBaru()">💾 Simpan</button><button onclick="closePopupLokasi()" class="btn-danger">Batal</button>
+<!-- POPUP LOKASI -->
+<div id="popupLokasi" class="popup">
+  <h3 id="judulTambahLokasi">➕ Tambah Lokasi Baru</h3>
+  <input type="text" id="namaLokasi" placeholder="Nama Lokasi">
+  <input type="number" inputmode="numeric" id="tarifLokasi" placeholder="Tarif per kamar/jam">
+  <select id="jenisLokasi">
+    <option value="kamar">Per Kamar</option>
+    <option value="jam">Per Jam</option>
+    <option value="borongan">Borongan</option>
+  </select>
+  <button onclick="simpanLokasiBaru()">💾 Simpan</button>
+  <button onclick="closePopupLokasi()" class="btn-danger">Batal</button>
 </div>
 
-<div id="popupDaftarLokasi" class="popup"><h3 id="judulDaftarLokasi">📋 Daftar Lokasi</h3><div id="isiDaftarLokasi"></div><button onclick="closePopupDaftarLokasi()" class="btn-danger">Tutup</button></div>
-<div id="popupRekap" class="popup"><h3>📊 Riwayat Pemasukan</h3><div id="isiRekap"></div><button onclick="closePopupRekap()" class="btn-danger">Tutup</button></div>
-<div id="popupDetail" class="popup"><h3 id="judulDetail"></h3><div id="isiDetail"></div><button onclick="closePopupDetail()" class="btn-danger">Tutup</button></div>
+<!-- POPUP DAFTAR LOKASI -->
+<div id="popupDaftarLokasi" class="popup">
+  <h3 id="judulDaftarLokasi">📋 Daftar Lokasi</h3>
+  <div id="isiDaftarLokasi"></div>
+  <button onclick="closePopupDaftarLokasi()" class="btn-danger">Tutup</button>
+</div>
+
+<!-- POPUP REKAP -->
+<div id="popupRekap" class="popup">
+  <h3>📊 Riwayat Pemasukan</h3>
+  <div id="isiRekap"></div>
+  <button onclick="closePopupRekap()" class="btn-danger">Tutup</button>
+</div>
+
+<!-- POPUP DETAIL -->
+<div id="popupDetail" class="popup">
+  <h3 id="judulDetail"></h3>
+  <div id="isiDetail"></div>
+  <button onclick="closePopupDetail()" class="btn-danger">Tutup</button>
+</div>
+
 <div id="popupOverlay2" onclick="closeSemuaPopup()"></div>
 
 <footer>💼 GajiKu Jepang <br>Design by Anamgambut</footer>
