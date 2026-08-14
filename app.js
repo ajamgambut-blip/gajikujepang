@@ -1935,10 +1935,6 @@ function ubahTarget() {
 
 
 /* =========================================================
-   SHARE
-   ========================================================= */
-
-/* =========================================================
    SHARE LAPORAN
    Isi:
    - Periode bulan
@@ -1946,6 +1942,7 @@ function ubahTarget() {
    - Total hari kerja
    - Total hari libur
    - Total kamar
+   - Rincian kamar per lokasi
    - Total jam
    ========================================================= */
 
@@ -2001,7 +1998,6 @@ function shareLaporan() {
       )
     ];
 
-
   const totalHariKerja =
     tanggalKerja.length;
 
@@ -2017,7 +2013,6 @@ function shareLaporan() {
       0
     ).getDate();
 
-
   const totalHariLibur =
     jumlahHariDalamBulan -
     totalHariKerja;
@@ -2027,18 +2022,61 @@ function shareLaporan() {
      TOTAL KAMAR
      ----------------------------------------- */
 
+  const dataKamar =
+    dataBulanIni.filter(
+      d =>
+        d.jenis === 'kamar'
+    );
+
+
   const totalKamar =
-    dataBulanIni
-      .filter(
-        d =>
-          d.jenis === 'kamar'
-      )
-      .reduce(
-        (total, d) =>
-          total +
-          Number(d.jumlah || 0),
-        0
-      );
+    dataKamar.reduce(
+      (total, d) =>
+        total +
+        Number(d.jumlah || 0),
+      0
+    );
+
+
+  /* -----------------------------------------
+     RINCIAN KAMAR PER LOKASI
+     ----------------------------------------- */
+
+  const kamarPerLokasi = {};
+
+
+  dataKamar.forEach(d => {
+
+    const nama =
+      d.lokasiNama ||
+      'Lokasi Tidak Diketahui';
+
+
+    if (
+      !kamarPerLokasi[nama]
+    ) {
+
+      kamarPerLokasi[nama] = 0;
+
+    }
+
+
+    kamarPerLokasi[nama] +=
+      Number(d.jumlah || 0);
+
+  });
+
+
+  let rincianKamar = '';
+
+
+  Object.keys(kamarPerLokasi)
+    .forEach(nama => {
+
+      rincianKamar +=
+        `   ${nama}: ${kamarPerLokasi[nama].toLocaleString()} kamar\n`;
+
+    });
 
 
   /* -----------------------------------------
@@ -2101,7 +2139,7 @@ ${totalHariLibur} hari
 
 🛏️ Total Kamar:
 ${totalKamar.toLocaleString()} kamar
-
+${rincianKamar}
 ⏱️ Total Jam:
 ${totalJam.toLocaleString()} jam`;
 
