@@ -2,6 +2,7 @@ let data = JSON.parse(localStorage.getItem('gajiData')) || [];
 let lokasi = JSON.parse(localStorage.getItem('lokasiData')) || [];
 let pengeluaran = JSON.parse(localStorage.getItem('pengeluaranData')) || [];
 let target = parseInt(localStorage.getItem('targetGaji')) || 250000;
+let riwayatTerbuka = false;
 
 function getBulanIni() {
     const now = new Date();
@@ -16,7 +17,7 @@ function simpanSemua() {
 }
 
 function showPopup(text) {
-    document.getElementById('popupText').innerText = text;
+    document.getElementById('popupText').innerHTML = `<p>${text}</p>`;
     document.getElementById('popupOverlay').style.display = 'block';
     document.getElementById('popup').style.display = 'block';
 }
@@ -24,6 +25,20 @@ function showPopup(text) {
 function closePopup() {
     document.getElementById('popupOverlay').style.display = 'none';
     document.getElementById('popup').style.display = 'none';
+}
+
+function toggleRiwayat() {
+    riwayatTerbuka =!riwayatTerbuka;
+    const div = document.getElementById('riwayat');
+    const btn = document.getElementById('btnToggleRiwayat');
+    if(riwayatTerbuka) {
+        div.style.display = 'block';
+        btn.innerText = '🙈 Sembunyikan Riwayat';
+        renderRiwayat();
+    } else {
+        div.style.display = 'none';
+        btn.innerText = '🔍 Lihat Semua Riwayat';
+    }
 }
 
 function tambahLokasi() {
@@ -75,13 +90,13 @@ function tambahData() {
 }
 
 function render() {
-    renderRiwayat();
     renderTotal();
     renderStatistik();
     renderRekap();
     renderKalender();
     renderPengeluaran();
     renderRekapBulanan();
+    if(riwayatTerbuka) renderRiwayat();
 }
 
 function renderTotal() {
@@ -101,7 +116,7 @@ function renderTotal() {
     document.getElementById('progressBar').style.width = `${persen>100?100:persen}%`;
     document.getElementById('progressText').innerText = `${persen}%`;
     document.getElementById('targetText').innerText = `¥${parseInt(target).toLocaleString()}`;
-} // INI YANG TADI KURANG
+}
 
 function ubahTarget() {
     const baru = prompt("Masukkan Target Bulanan Baru:", target);
@@ -199,11 +214,56 @@ function renderKalender() {
     const grid = document.getElementById('kalender');
     grid.innerHTML = '';
     const bulanIni = getBulanIni();
-    const hariKerja = [...new Set(data.filter(d=>d.tanggal.substring(0,7)===bulanIni).map(d=>d.tanggal.substring(8,10)))];
-    if(hariKerja.length === 0) grid.innerHTML = '<p style="color:#9ca3af">Belum ada data bulan ini</p>';
-    hariKerja.forEach(tgl=>{
-        grid.innerHTML += `<div style="background:#059669;padding:10px;border-radius:8px;text-align:center;font-weight:bold">${tgl}</div>`;
+    const dataBulanIni = data.filter(d=>d.tanggal.substring(0,7)===bulanIni);
+    const hariKerja = [...new Set(dataBulanIni.map(d=>d.tanggal))];
+
+    if(hariKerja.length === 0) {
+        grid.innerHTML = '<p style="color:#9ca3af">Belum ada data bulan ini</p>';
+        return;
+    }
+
+    hariKerja.sort().reverse().forEach(tgl => {
+        const totalGajiTgl = dataBulanIni.filter(d=>d.tanggal===tgl).reduce((a,b)=>a+b.gaji,0);
+        grid.innerHTML += `
+            <div onclick="showDetailTanggal('${tgl}')"
+                 style="background:#059669;padding:10px;border-radius:8px;text-align:center;cursor:pointer;min-width:70px">
+                <div style="font-weight:bold;font-size:18px">${tgl.substring(8,10)}</div>
+                <div style="font-size:10px">¥${totalGajiTgl.toLocaleString()}</div>
+            </div>
+        `;
     });
+}
+
+function showDetailTanggal(tanggal) {
+    const dataTgl = data.filter(d=>d.tanggal===tanggal);
+    let totalTgl = dataTgl.reduce((a,b)=>a+b.gaji,0);
+
+    let html = `<h3 style="margin-bottom:10px">📅 ${tanggal}</h3>`;
+    html += `<p style="color:#34d399;margin-bottom:12px">Total: ¥${totalTgl.toLocaleString()}</p>`;
+
+    dataTgl.forEach(d=>{
+        html += `
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #374151">
+            <div>
+                <b>${d.lokasi}</b><br>
+                <span style="color:#9ca3af;font-size:12px">${d.jumlah} ${d.jenis || 'item'}</span>
+            </div>
+            <b>¥${d.gaji.toLocaleString()}</b>
+        </div>`;
+    });
+
+    html += `<button onclick="hapusHari('${tanggal}')" style="background:#ef4444;margin-top:12px">🗑️ Hapus Semua Tanggal Ini</button>`;
+
+    document.getElementById('popupText').innerHTML = html;
+    document.getElementById('popupOverlay').style.display = 'block';
+    document.getElementById('popup').style.display = 'block';
+}
+
+function hapusHari(tanggal) {
+    if(!confirm(`Hapus semua data tanggal ${tanggal}?`)) return;
+    data = data.filter(d=>d.tanggal!== tanggal);
+    simpanSemua(); render(); closePopup();
+    showPopup(`Data tanggal ${tanggal} dihapus`);
 }
 
 function exportBackup() {
