@@ -227,7 +227,26 @@ function exportBackup(){
 }
 function importBackup(){
   const file = document.getElementById('importFile').files[0];
+  if(!file) return alert('Pilih file dulu ya');
+
   const reader = new FileReader();
-  reader.onload = (e) => { db = JSON.parse(e.target.result); simpan(); renderSemua(); alert('Import berhasil'); };
+  reader.onload = (e) => {
+    try {
+      const dataImport = JSON.parse(e.target.result);
+
+      // Cek biar ga ketimpa data kosong
+      if(!dataImport.data ||!dataImport.lokasi){
+        return alert('File backup salah format');
+      }
+
+      db = dataImport; // timpa data lama
+      simpan(); // INI KUNCI NYA. Simpen ke HP
+      renderSemua(); // gambar ulang
+
+      alert('Import berhasil! 🎉 Data 2 bulan kamu sudah kembali');
+    } catch(err) {
+      alert('Gagal import: File rusak. ' + err.message)
+    }
+  };
   reader.readAsText(file);
 }
