@@ -63,17 +63,7 @@
   <button onclick="ubahTarget()">✏️ Ubah Target</button>
 </section>
 
-<section class="card">
-  <h2 id="judulInput">📝 Input Kerja</h2>
-  <input type="date" id="tanggal">
-  <select id="lokasi">
-    <option value="">Pilih Lokasi</option>
-  </select>
-  <input type="number" inputmode="decimal" step="0.1" id="jumlah" placeholder="Jumlah kamar / jam">
-  <button onclick="tambahData()">💾 Simpan</button>
-  <button onclick="openPopupLokasi()" style="background:#3b82f6">➕ Tambah Lokasi</button>
-  <button onclick="openPopupDaftarLokasi()" style="background:#8b5cf6">👀 Lihat Daftar Lokasi</button>
-</section>
+<!-- CARD INPUT KERJA DIHAPUS, PINDAH KE POPUP -->
 
 <section class="card">
   <h2 id="judulBackup">💾 Backup</h2>
@@ -82,11 +72,36 @@
     <button onclick="document.getElementById('importFile').click()" style="background:#3b82f6">⬆️ Import</button>
   </div>
   <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup()">
+
+  <h2 id="judulInput" style="margin-top:16px">📝 Kelola Data</h2>
+  <button onclick="openPopupLokasi()" style="background:#3b82f6">➕ Tambah Lokasi</button>
+  <button onclick="openPopupDaftarLokasi()" style="background:#8b5cf6">👀 Lihat Daftar Lokasi</button>
 </section>
 
 </div>
 
-<!-- POPUP LOKASI -->
+<!-- POPUP DETAIL BARU: ADA RINCIAN + TOMBOL TAMBAH -->
+<div id="popupDetail" class="popup">
+  <h3 id="judulDetail"></h3>
+  <div id="isiDetail"></div>
+  <button onclick="openPopupInputDariDetail()" style="background:#10b981">➕ Tambah Data</button>
+  <button onclick="closePopupDetail()" class="btn-danger">Tutup</button>
+</div>
+
+<!-- POPUP INPUT BARU -->
+<div id="popupInput" class="popup">
+  <h3 id="judulInputPopup">📝 Input Data</h3>
+  <p id="inputTanggalText" style="color:#9ca3af; font-size:14px; margin-top:-8px"></p>
+  <input type="hidden" id="inputTanggal">
+  <select id="inputLokasi">
+    <option value="">Pilih Lokasi</option>
+  </select>
+  <input type="number" inputmode="decimal" step="0.1" id="inputJumlah" placeholder="Jumlah kamar / jam">
+  <button onclick="simpanDataDariPopup()">💾 Simpan</button>
+  <button onclick="closePopupInput()" class="btn-danger">Batal</button>
+</div>
+
+<!-- POPUP LAINNYA TETEP -->
 <div id="popupLokasi" class="popup">
   <h3 id="judulTambahLokasi">➕ Tambah Lokasi Baru</h3>
   <input type="text" id="namaLokasi" placeholder="Nama Lokasi">
@@ -100,28 +115,18 @@
   <button onclick="closePopupLokasi()" class="btn-danger">Batal</button>
 </div>
 
-<!-- POPUP DAFTAR LOKASI -->
 <div id="popupDaftarLokasi" class="popup">
   <h3 id="judulDaftarLokasi">📋 Daftar Lokasi</h3>
   <div id="isiDaftarLokasi"></div>
   <button onclick="closePopupDaftarLokasi()" class="btn-danger">Tutup</button>
 </div>
 
-<!-- POPUP REKAP -->
 <div id="popupRekap" class="popup">
   <h3>📊 Riwayat Pemasukan</h3>
   <div id="isiRekap"></div>
   <button onclick="closePopupRekap()" class="btn-danger">Tutup</button>
 </div>
 
-<!-- POPUP DETAIL BARU ADA TOMBOL EDIT HAPUS -->
-<div id="popupDetail" class="popup">
-  <h3 id="judulDetail"></h3>
-  <div id="isiDetail"></div>
-  <button onclick="closePopupDetail()" class="btn-danger">Tutup</button>
-</div>
-
-<!-- POPUP EDIT -->
 <div id="popupEdit" class="popup">
   <h3 id="judulEdit">✏️ Edit Data</h3>
   <input type="date" id="editTanggal">
@@ -134,6 +139,6 @@
 <div id="popupOverlay2" onclick="closeSemuaPopup()"></div>
 
 <footer>💼 GajiKu Jepang <br>Design by Anamgambut</footer>
-<script src="app.js?v=12"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>
