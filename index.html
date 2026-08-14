@@ -25,28 +25,22 @@
 </header>
 
 <section class="card dashboard">
-  <h2 id="judulBulan">💴 Pendapatan Bulan Ini</h2>
-  <div id="totalGaji" class="total">¥0</div>
-  <div id="totalSemua" style="font-size:12px;color:#9ca3af;margin-top:5px">Total Bulan Ini: ¥0</div>
-  <div class="target-box">
-    <h3 id="judulTarget">🎯 Target Bulanan</h3>
-    <div id="targetText">¥250,000</div>
-    <div class="progress"><div id="progressBar"></div></div>
-    <p id="progressText">0%</p>
-    <button onclick="ubahTarget()">✏️ Ubah Target</button>
+  <div class="kalender-nav">
+    <button onclick="gantiBulanHeader(-1)">‹</button>
+    <h2 id="judulHeaderBulan">💴 Pendapatan Bulan Ini</h2>
+    <button onclick="gantiBulanHeader(1)">›</button>
   </div>
+  <div id="totalGaji" class="total">¥0</div>
 </section>
 
 <section class="card">
-  <h2 id="judulInput">📝 Input Kerja</h2>
-  <input type="date" id="tanggal">
-  <select id="lokasi">
-    <option value="">Pilih Lokasi</option>
-  </select>
-  <input type="number" inputmode="decimal" step="0.1" id="jumlah" placeholder="Jumlah kamar / jam">
-  <button onclick="tambahData()">💾 Simpan</button>
-  <button onclick="openPopupLokasi()" style="background:#3b82f6">➕ Tambah Lokasi</button>
-  <button onclick="openPopupDaftarLokasi()" style="background:#8b5cf6">👀 Lihat Daftar Lokasi</button>
+  <h2 id="judulKalender">🗓️ Kalender</h2>
+  <div class="kalender-nav">
+    <button onclick="gantiBulan(-1)">‹</button>
+    <span id="bulanTahun"></span>
+    <button onclick="gantiBulan(1)">›</button>
+  </div>
+  <div id="kalender" class="kalender-grid"></div>
 </section>
 
 <section class="card">
@@ -61,14 +55,24 @@
   <button onclick="shareLaporan()" style="background:#10b981;margin-top:12px">📤 Share Laporan Bulan Ini</button>
 </section>
 
+<section class="card target-box">
+  <h2 id="judulTarget">🎯 Target Bulanan</h2>
+  <div id="targetText">¥250,000</div>
+  <div class="progress"><div id="progressBar"></div></div>
+  <p id="progressText">0%</p>
+  <button onclick="ubahTarget()">✏️ Ubah Target</button>
+</section>
+
 <section class="card">
-  <h2 id="judulKalender">🗓️ Kalender</h2>
-  <div class="kalender-nav">
-    <button onclick="gantiBulan(-1)">‹</button>
-    <span id="bulanTahun"></span>
-    <button onclick="gantiBulan(1)">›</button>
-  </div>
-  <div id="kalender" class="kalender-grid"></div>
+  <h2 id="judulInput">📝 Input Kerja</h2>
+  <input type="date" id="tanggal">
+  <select id="lokasi">
+    <option value="">Pilih Lokasi</option>
+  </select>
+  <input type="number" inputmode="decimal" step="0.1" id="jumlah" placeholder="Jumlah kamar / jam">
+  <button onclick="tambahData()">💾 Simpan</button>
+  <button onclick="openPopupLokasi()" style="background:#3b82f6">➕ Tambah Lokasi</button>
+  <button onclick="openPopupDaftarLokasi()" style="background:#8b5cf6">👀 Lihat Daftar Lokasi</button>
 </section>
 
 <section class="card">
@@ -110,16 +114,26 @@
   <button onclick="closePopupRekap()" class="btn-danger">Tutup</button>
 </div>
 
-<!-- POPUP DETAIL -->
+<!-- POPUP DETAIL BARU ADA TOMBOL EDIT HAPUS -->
 <div id="popupDetail" class="popup">
   <h3 id="judulDetail"></h3>
   <div id="isiDetail"></div>
   <button onclick="closePopupDetail()" class="btn-danger">Tutup</button>
 </div>
 
+<!-- POPUP EDIT -->
+<div id="popupEdit" class="popup">
+  <h3 id="judulEdit">✏️ Edit Data</h3>
+  <input type="date" id="editTanggal">
+  <select id="editLokasi"></select>
+  <input type="number" inputmode="decimal" step="0.1" id="editJumlah" placeholder="Jumlah">
+  <button onclick="simpanEdit()">💾 Simpan Perubahan</button>
+  <button onclick="closePopupEdit()" class="btn-danger">Batal</button>
+</div>
+
 <div id="popupOverlay2" onclick="closeSemuaPopup()"></div>
 
 <footer>💼 GajiKu Jepang <br>Design by Anamgambut</footer>
-<script src="app.js"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>
