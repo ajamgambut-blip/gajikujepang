@@ -232,20 +232,23 @@ function importBackup(){
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
-      const dataImport = JSON.parse(e.target.result);
+      db = JSON.parse(e.target.result);
 
-      // Cek biar ga ketimpa data kosong
-      if(!dataImport.data ||!dataImport.lokasi){
-        return alert('File backup salah format');
-      }
+      // kasih default kalau ada yg kurang
+      if(!db.target) db.target = 250000;
+      if(!db.bahasa) db.bahasa = 'id';
+      if(!db.lokasi) db.lokasi = [];
+      if(!db.data) db.data = [];
 
-      db = dataImport; // timpa data lama
-      simpan(); // INI KUNCI NYA. Simpen ke HP
-      renderSemua(); // gambar ulang
+      simpan();
+      renderSemua();
 
-      alert('Import berhasil! 🎉 Data 2 bulan kamu sudah kembali');
+      // NOTE SUKSES
+      alert('✅ Import berhasil! \nData 2 bulan kamu sudah kembali');
+      navigator.vibrate && navigator.vibrate(200); // getar 1x kalau HP support
+
     } catch(err) {
-      alert('Gagal import: File rusak. ' + err.message)
+      alert('❌ Gagal import: ' + err.message)
     }
   };
   reader.readAsText(file);
