@@ -1,12 +1,12 @@
 let db = { data: [], lokasi: [], target: 250000, bahasa: 'id' };
 let bulanAktif = new Date();
 let idEdit = null;
-let tanggalAktifPopup = null; // buat simpen tanggal yg diklik
+let tanggalAktifPopup = null;
 
 const bahasa = {
-  id: { judul: "Pengelola Gaji & Absensi", input: "📝 Kelola Data", statistik: "📈 Statistik", rekap: "📅 Rekap Bulanan", daftar: "📋 Daftar Lokasi", tambah: "➕ Tambah Lokasi Baru", hariKerja: "Hari Kerja", hariLibur: "Hari Libur", totalJam: "Total Jam", totalKamar: "Total Kamar", target: "🎯 Target Bulanan", kalender: "🗓️ Kalender", backup: "💾 Backup", pendapatan: "💴 Pendapatan Bulan" },
-  en: { judul: "Salary Manager", input: "📝 Manage Data", statistik: "📈 Monthly Stats", rekap: "📅 Monthly Recap", daftar: "📋 Location List", tambah: "➕ Add Location", hariKerja: "Work Days", hariLibur: "Days Off", totalJam: "Total Hours", totalKamar: "Total Rooms", target: "🎯 Monthly Target", kalender: "🗓️ Calendar", backup: "💾 Backup", pendapatan: "💴 Income for" },
-  jp: { judul: "給与管理", input: "📝 データ管理", statistik: "📈 今月の統計", rekap: "📅 月間集計", daftar: "📋 場所リスト", tambah: "➕ 場所を追加", hariKerja: "出勤日数", hariLibur: "休日", totalJam: "合計時間", totalKamar: "合計部屋数", target: "🎯 月間目標", kalender: "🗓️ カレンダー", backup: "💾 バックアップ", pendapatan: "💴 の収入" }
+  id: { judul: "Pengelola Gaji & Absensi", statistik: "📈 Statistik", rekap: "📅 Rekap Bulanan", daftar: "📋 Daftar Lokasi", tambah: "➕ Tambah Lokasi Baru", hariKerja: "Hari Kerja", hariLibur: "Hari Libur", totalJam: "Total Jam", totalKamar: "Total Kamar", target: "🎯 Target Bulanan", kalender: "🗓️ Kalender", backup: "💾 Backup & Data", pendapatan: "💴 Pendapatan Bulan" },
+  en: { judul: "Salary Manager", statistik: "📈 Statistics", rekap: "📅 Monthly Recap", daftar: "📋 Location List", tambah: "➕ Add Location", hariKerja: "Work Days", hariLibur: "Days Off", totalJam: "Total Hours", totalKamar: "Total Rooms", target: "🎯 Monthly Target", kalender: "🗓️ Calendar", backup: "💾 Backup & Data", pendapatan: "💴 Income for" },
+  jp: { judul: "給与管理", statistik: "📈 今月の統計", rekap: "📅 月間集計", daftar: "📋 場所リスト", tambah: "➕ 場所を追加", hariKerja: "出勤日数", hariLibur: "休日", totalJam: "合計時間", totalKamar: "合計部屋数", target: "🎯 月間目標", kalender: "🗓️ カレンダー", backup: "💾 バックアップ", pendapatan: "💴 の収入" }
 };
 
 window.onload = () => {
@@ -23,7 +23,6 @@ function gantiBahasa(){
   db.bahasa = document.getElementById('pilihBahasa').value;
   const b = bahasa[db.bahasa];
   document.getElementById('subJudul').innerText = b.judul;
-  document.getElementById('judulInput').innerText = b.input;
   document.getElementById('judulStatistik').innerText = b.statistik;
   document.getElementById('judulRekap').innerText = b.rekap;
   document.getElementById('judulDaftarLokasi').innerText = b.daftar;
@@ -48,18 +47,11 @@ function openPopupDetail(tgl){ tanggalAktifPopup = tgl; renderPopupDetail(tgl); 
 function closePopupDetail(){ document.getElementById('popupDetail').style.display = 'none'; document.getElementById('popupOverlay2').style.display = 'none'; }
 function openPopupEdit(id){ idEdit = id; const data = db.data.find(d=>d.id==id); document.getElementById('editTanggal').value = data.tanggal; renderSelectEditLokasi(); document.getElementById('editLokasi').value = data.lokasiId; document.getElementById('editJumlah').value = data.jumlah; document.getElementById('popupEdit').style.display = 'block'; document.getElementById('popupOverlay2').style.display = 'block'; }
 function closePopupEdit(){ document.getElementById('popupEdit').style.display = 'none'; document.getElementById('popupOverlay2').style.display = 'none'; }
-
-// POPUP INPUT BARU
-function openPopupInputDariDetail(){
-  renderSelectInputLokasi();
-  document.getElementById('inputTanggal').value = tanggalAktifPopup;
-  document.getElementById('inputTanggalText').innerText = `Tanggal: ${tanggalAktifPopup}`;
-  document.getElementById('inputJumlah').value = '';
-  document.getElementById('popupInput').style.display = 'block';
-}
+function openPopupStatistik(){ renderPopupStatistik(); document.getElementById('popupStatistik').style.display = 'block'; document.getElementById('popupOverlay2').style.display = 'block'; }
+function closePopupStatistik(){ document.getElementById('popupStatistik').style.display = 'none'; document.getElementById('popupOverlay2').style.display = 'none'; }
+function openPopupInputDariDetail(){ renderSelectInputLokasi(); document.getElementById('inputTanggal').value = tanggalAktifPopup; document.getElementById('inputTanggalText').innerText = `Tanggal: ${tanggalAktifPopup}`; document.getElementById('inputJumlah').value = ''; document.getElementById('popupInput').style.display = 'block'; }
 function closePopupInput(){ document.getElementById('popupInput').style.display = 'none'; }
-
-function closeSemuaPopup(){ closePopupLokasi(); closePopupDaftarLokasi(); closePopupRekap(); closePopupDetail(); closePopupEdit(); closePopupInput(); }
+function closeSemuaPopup(){ closePopupLokasi(); closePopupDaftarLokasi(); closePopupRekap(); closePopupDetail(); closePopupEdit(); closePopupInput(); closePopupStatistik(); }
 
 // LOKASI
 function simpanLokasiBaru(){
@@ -114,7 +106,7 @@ function renderKalender() {
   }
 }
 
-// POPUP DETAIL BARU: RINCIAN + TOMBOL TAMBAH
+// POPUP DETAIL
 function renderPopupDetail(tgl){
   const dataHari = db.data.filter(d=>d.tanggal==tgl);
   document.getElementById('judulDetail').innerText = `Detail ${tgl}`;
@@ -141,7 +133,7 @@ function simpanDataDariPopup(){
   let total = (lokasi.jenis == 'kamar' || lokasi.jenis == 'jam')? jumlah * lokasi.tarif : lokasi.tarif;
   db.data.push({ tanggal, lokasiId, lokasiNama: lokasi.nama, jumlah, total, jenis: lokasi.jenis, id: Date.now() });
   simpan(); renderSemua(); closePopupInput();
-  renderPopupDetail(tanggal); // refresh popup detail biar langsung muncul datanya
+  renderPopupDetail(tanggal);
   alert('Tersimpan!');
 }
 
@@ -164,8 +156,8 @@ function simpanEdit(){
   simpan(); renderSemua(); closePopupEdit(); renderPopupDetail(data.tanggal);
 }
 
-// STATISTIK + REKAP
-function renderStatistik(){
+// POPUP STATISTIK
+function renderPopupStatistik(){
   const bulanIni = `${bulanAktif.getFullYear()}-${String(bulanAktif.getMonth()+1).padStart(2,'0')}`;
   const dataBulanIni = db.data.filter(x=>x.tanggal.startsWith(bulanIni));
   const jmlHari = new Date(bulanAktif.getFullYear(), bulanAktif.getMonth() + 1, 0).getDate();
@@ -175,16 +167,19 @@ function renderStatistik(){
   const namaBulan = bulanAktif.toLocaleString(db.bahasa=='jp'?'ja-JP':db.bahasa=='en'?'en-US':'id-ID', {month: 'long', year: 'numeric'});
   let html = `<div class="stat-item"><span>Bulan</span><b>${namaBulan}</b></div>`;
   html += `<div class="stat-item"><span>${b.hariKerja}</span><b>${hariKerja} hari</b></div><div class="stat-item"><span>${b.hariLibur}</span><b>${hariLibur} hari</b></div>`;
+  if(db.lokasi.some(l=>dataBulanIni.filter(x=>x.lokasiId == l.id).length > 0)){ html += `<hr style="border-color:#374151; margin:12px 0">`; }
   db.lokasi.forEach(l=>{
     const dataLokasi = dataBulanIni.filter(x=>x.lokasiId == l.id);
     const total = dataLokasi.reduce((a,b)=>a+b.total,0);
     const jumlah = dataLokasi.reduce((a,b)=>a+b.jumlah,0);
     if(jumlah > 0){
-      if(l.jenis == 'jam') html += `<div class="stat-item"><span>${l.nama} - ${b.totalJam}</span><b>${jumlah} jam / ¥${total.toLocaleString()}</b></div>`;
-      if(l.jenis == 'kamar') html += `<div class="stat-item"><span>${l.nama} - ${b.totalKamar}</span><b>${jumlah} kamar / ¥${total.toLocaleString()}</b></div>`;
+      if(l.jenis == 'jam') html += `<div class="stat-item"><span>${l.nama} - ${b.totalJam}</span><b>${jumlah} jam<br>¥${total.toLocaleString()}</b></div>`;
+      if(l.jenis == 'kamar') html += `<div class="stat-item"><span>${l.nama} - ${b.totalKamar}</span><b>${jumlah} kamar<br>¥${total.toLocaleString()}</b></div>`;
+      if(l.jenis == 'borongan') html += `<div class="stat-item"><span>${l.nama}</span><b>${dataLokasi.length} kali<br>¥${total.toLocaleString()}</b></div>`;
     }
   });
-  document.getElementById('statistik').innerHTML = html;
+  if(dataBulanIni.length == 0){ html = '<p style="color:#9ca3af; text-align:center">Belum ada data di bulan ini</p>' }
+  document.getElementById('isiStatistikPopup').innerHTML = html;
 }
 
 function renderPopupRekap(){
@@ -200,7 +195,6 @@ function renderPopupRekap(){
 function renderSemua(){
   renderKalender();
   renderSelectInputLokasi();
-  renderStatistik();
   const bulanIni = `${bulanAktif.getFullYear()}-${String(bulanAktif.getMonth()+1).padStart(2,'0')}`;
   const dataBulanIni = db.data.filter(x=>x.tanggal.startsWith(bulanIni));
   const totalBulanIni = dataBulanIni.reduce((a,b)=>a+b.total,0);
