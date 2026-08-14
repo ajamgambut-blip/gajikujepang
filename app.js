@@ -1,5 +1,6 @@
 let db = { data: [], lokasi: [], target: 250000, bahasa: 'id' };
 let bulanAktif = new Date();
+
 const bahasa = {
   id: { judul: "Pengelola Gaji & Absensi", input: "📝 Input Kerja", statistik: "📈 Statistik Bulan Ini", rekap: "📅 Rekap Bulanan", daftar: "📋 Daftar Lokasi", tambah: "➕ Tambah Lokasi Baru", hariKerja: "Hari Kerja", hariLibur: "Hari Libur", totalJam: "Total Jam", totalKamar: "Total Kamar", target: "🎯 Target Bulanan", kalender: "🗓️ Kalender", backup: "💾 Backup" },
   en: { judul: "Salary Manager", input: "📝 Work Input", statistik: "📈 Monthly Stats", rekap: "📅 Monthly Recap", daftar: "📋 Location List", tambah: "➕ Add Location", hariKerja: "Work Days", hariLibur: "Days Off", totalJam: "Total Hours", totalKamar: "Total Rooms", target: "🎯 Monthly Target", kalender: "🗓️ Calendar", backup: "💾 Backup" },
@@ -15,8 +16,13 @@ window.onload = () => {
   renderSemua();
 };
 
-function simpan() { localStorage.setItem('gajikuDB', JSON.stringify(db)); }
-function setTanggalHariIni(){ document.getElementById('tanggal').valueAsDate = new Date(); }
+function simpan() {
+  localStorage.setItem('gajikuDB', JSON.stringify(db));
+}
+
+function setTanggalHariIni(){
+  document.getElementById('tanggal').valueAsDate = new Date();
+}
 
 function gantiBahasa(){
   db.bahasa = document.getElementById('pilihBahasa').value;
@@ -114,7 +120,7 @@ function renderKalender() {
     const dataHari = db.data.filter(d=>d.tanggal==key);
     const total = dataHari.reduce((a,b)=>a+b.total,0);
     const adaKerja = total > 0? 'ada-kerja' : '';
-    grid.innerHTML += `<div class="kalender-item ${adaKerja}" onclick="openPopupDetail('${key}')"><b>${t}</b><small>${total?'¥'+total.toLocaleString():'-'}</small></div>`;
+    grid.innerHTML += `<div class="kalender-item ${adaKerja}" onclick="openPopupDetail('${key}')"><b>${t}</b><small>${total? '¥'+total.toLocaleString() : '-'}</small></div>`;
   }
 }
 
@@ -175,7 +181,10 @@ function renderSemua(){
   document.getElementById('totalSejakAwal').innerHTML = `<div class="stat-item"><span>Total Sejak Awal</span><b style="color:#3b82f6">¥${totalSejakAwal.toLocaleString()}</b></div>`;
 }
 
-function ubahTarget(){ const t = prompt("Masukkan target baru:", db.target); if(t){ db.target = parseFloat(t); simpan(); renderSemua(); } }
+function ubahTarget(){
+  const t = prompt("Masukkan target baru:", db.target);
+  if(t){ db.target = parseFloat(t); simpan(); renderSemua(); }
+}
 
 function shareLaporan(){
   const bulanIni = `${bulanAktif.getFullYear()}-${String(bulanAktif.getMonth()+1).padStart(2,'0')}`;
@@ -184,7 +193,19 @@ function shareLaporan(){
   const teks = `Laporan GajiKu Jepang - ${bulanIni}\nTotal Pendapatan: ¥${total.toLocaleString()}\nJumlah Kerja: ${dataBulanIni.length} kali`;
   if(navigator.share){ navigator.share({ title: 'Laporan GajiKu', text: teks }); }
   else { navigator.clipboard.writeText(teks); alert('Laporan disalin!'); }
-} // <-- INI TADI YG KETINGGALAN
+}
 
-function exportBackup(){ const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db)); const a = document.createElement('a'); a.href = dataStr; a.download = "gajiku_backup.json"; a.click(); }
-function importBackup(){ const file = document.getElementById('importFile').files[0]; const reader = new FileReader(); reader.onload = (e) => { db = JSON.parse(e.target.result); simpan(); renderSemua(); alert('Import berhasil'); }; reader.readAsText(file); }
+function exportBackup(){
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+  const a = document.createElement('a');
+  a.href = dataStr;
+  a.download = "gajiku_backup.json";
+  a.click();
+}
+
+function importBackup(){
+  const file = document.getElementById('importFile').files[0];
+  const reader = new FileReader();
+  reader.onload = (e) => { db = JSON.parse(e.target.result); simpan(); renderSemua(); alert('Import berhasil'); };
+  reader.readAsText(file);
+}
