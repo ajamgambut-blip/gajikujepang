@@ -1938,41 +1938,177 @@ function ubahTarget() {
    SHARE
    ========================================================= */
 
+/* =========================================================
+   SHARE LAPORAN
+   Isi:
+   - Periode bulan
+   - Total pendapatan
+   - Total hari kerja
+   - Total hari libur
+   - Total kamar
+   - Total jam
+   ========================================================= */
+
 function shareLaporan() {
 
-  const bulanIni =
-    `${bulanAktif.getFullYear()}-${
-      String(
-        bulanAktif.getMonth() + 1
-      ).padStart(2, '0')
-    }`;
+  const tahun =
+    bulanAktif.getFullYear();
 
+  const bulan =
+    bulanAktif.getMonth();
+
+  const bulanKey =
+    `${tahun}-${String(
+      bulan + 1
+    ).padStart(2, '0')}`;
+
+
+  /* -----------------------------------------
+     DATA BULAN AKTIF
+     ----------------------------------------- */
 
   const dataBulanIni =
     db.data.filter(
-      x =>
-        x.tanggal.startsWith(
-          bulanIni
-        )
+      d =>
+        String(d.tanggal)
+          .startsWith(bulanKey)
     );
 
 
-  const total =
+  /* -----------------------------------------
+     TOTAL PENDAPATAN
+     ----------------------------------------- */
+
+  const totalPendapatan =
     dataBulanIni.reduce(
-      (a, b) =>
-        a +
-        Number(
-          b.total || 0
-        ),
+      (total, d) =>
+        total +
+        Number(d.total || 0),
       0
     );
 
 
-  const teks =
-    `Laporan GajiKu Jepang - ${bulanIni}\n` +
-    `Total Pendapatan: ¥${total.toLocaleString()}\n` +
-    `Jumlah Kerja: ${dataBulanIni.length} kali`;
+  /* -----------------------------------------
+     TOTAL HARI KERJA
+     ----------------------------------------- */
 
+  const tanggalKerja =
+    [
+      ...new Set(
+        dataBulanIni
+          .map(d => d.tanggal)
+          .filter(Boolean)
+      )
+    ];
+
+
+  const totalHariKerja =
+    tanggalKerja.length;
+
+
+  /* -----------------------------------------
+     TOTAL HARI LIBUR
+     ----------------------------------------- */
+
+  const jumlahHariDalamBulan =
+    new Date(
+      tahun,
+      bulan + 1,
+      0
+    ).getDate();
+
+
+  const totalHariLibur =
+    jumlahHariDalamBulan -
+    totalHariKerja;
+
+
+  /* -----------------------------------------
+     TOTAL KAMAR
+     ----------------------------------------- */
+
+  const totalKamar =
+    dataBulanIni
+      .filter(
+        d =>
+          d.jenis === 'kamar'
+      )
+      .reduce(
+        (total, d) =>
+          total +
+          Number(d.jumlah || 0),
+        0
+      );
+
+
+  /* -----------------------------------------
+     TOTAL JAM
+     ----------------------------------------- */
+
+  const totalJam =
+    dataBulanIni
+      .filter(
+        d =>
+          d.jenis === 'jam'
+      )
+      .reduce(
+        (total, d) =>
+          total +
+          Number(d.jumlah || 0),
+        0
+      );
+
+
+  /* -----------------------------------------
+     NAMA BULAN
+     ----------------------------------------- */
+
+  const locale =
+    db.bahasa === 'jp'
+      ? 'ja-JP'
+      : db.bahasa === 'en'
+        ? 'en-US'
+        : 'id-ID';
+
+
+  const namaBulan =
+    bulanAktif.toLocaleString(
+      locale,
+      {
+        month: 'long',
+        year: 'numeric'
+      }
+    );
+
+
+  /* -----------------------------------------
+     FORMAT LAPORAN
+     ----------------------------------------- */
+
+  const teks =
+`📊 LAPORAN GAJIKU JEPANG
+
+📅 Periode: ${namaBulan}
+
+💰 Total Pendapatan:
+¥${totalPendapatan.toLocaleString()}
+
+📅 Total Hari Kerja:
+${totalHariKerja} hari
+
+🏖️ Total Hari Libur:
+${totalHariLibur} hari
+
+🛏️ Total Kamar:
+${totalKamar.toLocaleString()} kamar
+
+⏱️ Total Jam:
+${totalJam.toLocaleString()} jam`;
+
+
+  /* -----------------------------------------
+     SHARE
+     ----------------------------------------- */
 
   if (
     navigator.share
@@ -1981,7 +2117,7 @@ function shareLaporan() {
     navigator.share({
 
       title:
-        'Laporan GajiKu',
+        `Laporan GajiKu - ${namaBulan}`,
 
       text:
         teks
@@ -1997,21 +2133,33 @@ function shareLaporan() {
     ) {
 
       navigator.clipboard
-        .writeText(teks);
+        .writeText(teks)
+        .then(
+          () => {
 
-      alert(
-        'Laporan disalin!'
-      );
+            alert(
+              '✅ Laporan berhasil disalin!'
+            );
+
+          }
+        )
+        .catch(
+          () => {
+
+            alert(teks);
+
+          }
+        );
 
     } else {
 
       alert(teks);
 
     }
+
   }
+
 }
-
-
 /* =========================================================
    EXPORT BACKUP BARU
    ========================================================= */
