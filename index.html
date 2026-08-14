@@ -2,321 +2,141 @@
 <html lang="id">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>💼 GajiKu Jepang</title>
-
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
-
 <link rel="apple-touch-icon" href="icon-192.png">
-
 <meta name="theme-color" content="#111827">
-
 </head>
 
 <body>
-
 <div class="container">
-
 <header>
-
 <h1>💼 GajiKu Jepang</h1>
-
 <p>Pengelola Gaji & Absensi</p>
-
 </header>
 
 <!-- DASHBOARD -->
-
 <section class="card dashboard">
-
-<h2 id="judulBulan">
-💴 Pendapatan Bulan Ini
-</h2>
-
-<div id="totalGaji" class="total">
-¥0
-</div>
+<h2 id="judulBulan">💴 Pendapatan Bulan Ini</h2>
+<div id="totalGaji" class="total">¥0</div>
+<div id="totalSemua" style="font-size:12px;color:#9ca3af;margin-top:5px">Total Semua: ¥0</div>
 
 <div class="target-box">
-
 <h3>🎯 Target Bulanan</h3>
-
-<div id="targetText">
-¥250,000
-</div>
-
+<div id="targetText">¥250,000</div>
 <div class="progress">
-
 <div id="progressBar"></div>
-
 </div>
-
-<p id="progressText">
-0%
-</p>
-
-<button onclick="ubahTarget()">
-✏️ Ubah Target
-</button>
-
+<p id="progressText">0%</p>
+<button onclick="ubahTarget()">✏️ Ubah Target</button>
 </div>
-
 </section>
 
 <!-- INPUT -->
-
 <section class="card">
-
 <h2>📝 Input Kerja</h2>
-
-<input
-type="date"
-id="tanggal">
-
+<input type="date" id="tanggal">
 <select id="lokasi"></select>
-
-<input
-type="number"
-step="0.1"
-id="jumlah"
-placeholder="Jumlah kamar / jam">
-
-<button onclick="tambahData()">
-💾 Simpan
-</button>
-
+<input type="number" inputmode="decimal" step="0.1" id="jumlah" placeholder="Jumlah kamar / jam">
+<button onclick="tambahData()">💾 Simpan</button>
 </section>
 
 <!-- LOKASI -->
-
 <section class="card">
-
 <h2>📍 Kelola Lokasi</h2>
-
-<input
-type="text"
-id="namaLokasi"
-placeholder="Nama Lokasi">
-
-<input
-type="number"
-id="tarifLokasi"
-placeholder="Tarif">
-
+<input type="text" id="namaLokasi" placeholder="Nama Lokasi">
+<input type="number" inputmode="numeric" id="tarifLokasi" placeholder="Tarif">
 <select id="jenisLokasi">
-
-<option value="kamar">
-Per Kamar
-</option>
-
-<option value="jam">
-Per Jam
-</option>
-
-<option value="borongan">
-Borongan
-</option>
-
+<option value="kamar">Per Kamar</option>
+<option value="jam">Per Jam</option>
+<option value="borongan">Borongan</option>
 </select>
-
-<button onclick="tambahLokasi()">
-Tambah Lokasi
-</button>
-
+<button onclick="tambahLokasi()">Tambah Lokasi</button>
 <div id="daftarLokasi"></div>
-
 </section>
 
 <!-- REKAP -->
-
 <section class="card">
-
 <h2>📊 Rekap Lokasi</h2>
-
 <div id="rekapLokasi"></div>
-
 </section>
 
 <!-- STATISTIK -->
-
 <section class="card">
-
 <h2>📈 Statistik</h2>
-
 <div id="statistik"></div>
-
 </section>
 
 <!-- PENGELUARAN -->
-
 <section class="card">
-
 <h2>💰 Pengeluaran</h2>
-
-<input
-type="text"
-id="namaPengeluaran"
-placeholder="Nama">
-
-<input
-type="number"
-id="jumlahPengeluaran"
-placeholder="Jumlah">
-
-<button onclick="tambahPengeluaran()">
-Tambah
-</button>
-
+<input type="text" id="namaPengeluaran" placeholder="Nama">
+<input type="number" inputmode="numeric" id="jumlahPengeluaran" placeholder="Jumlah">
+<button onclick="tambahPengeluaran()">Tambah</button>
 <div id="daftarPengeluaran"></div>
-
 <hr>
-
 <div id="ringkasanKeuangan"></div>
-
 </section>
 
 <!-- REKAP BULAN -->
-
 <section class="card">
-
 <h2>📅 Rekap Bulanan</h2>
-
 <div id="rekapBulanan"></div>
-
 </section>
 
 <!-- KALENDER -->
-
 <section class="card">
-
 <h2>🗓️ Kalender</h2>
-
-<div
-id="kalender"
-class="kalender-grid">
-</div>
-
-<div
-id="detailTanggal"
-style="display:none;">
-</div>
-
+<div id="kalender" class="kalender-grid"></div>
+<div id="detailTanggal" style="display:none;"></div>
 </section>
 
 <!-- RIWAYAT -->
-
 <section class="card">
-
 <h2>📂 Riwayat Kerja</h2>
-
-<input
-type="month"
-id="filterBulan"
-onchange="render()">
-
+<input type="month" id="filterBulan" onchange="render()">
 <div id="riwayat"></div>
-
 </section>
 
 <!-- BACKUP -->
-
 <section class="card">
-
 <h2>💾 Backup & Restore</h2>
-
-<button onclick="exportBackup()">
-
-Export Backup
-
-</button>
-
+<button onclick="exportBackup()">Export Backup</button>
 <hr>
-
-<input
-type="file"
-id="importFile"
-accept=".json">
-
-<button onclick="importBackup()">
-
-Import Backup
-
-</button>
-
+<input type="file" id="importFile" accept=".json">
+<button onclick="importBackup()">Import Backup</button>
 </section>
 
 </div>
 
 <!-- POPUP -->
-
-<div
-id="popupOverlay"
-onclick="closePopup()">
-</div>
-
+<div id="popupOverlay" onclick="closePopup()"></div>
 <div id="popup">
-
 <p id="popupText"></p>
-
-<button onclick="closePopup()">
-
-Tutup
-
-</button>
-
+<button onclick="closePopup()">Tutup</button>
 </div>
 
 <!-- INSTALL -->
-
 <div class="install-box">
-
-<button
-id="installBtn"
-style="display:none;">
-
-📲 Install GajiKu Jepang
-
-</button>
-
+<button id="installBtn" style="display:none;">📲 Install GajiKu Jepang</button>
 </div>
 
 <footer>
-
-💼 GajiKu Jepang
-
-<br>
-
+💼 GajiKu Jepang <br>
 Design by Anamgambut
-
 </footer>
 
 <script src="app.js"></script>
-
 <script>
-
 if("serviceWorker" in navigator){
-
-navigator.serviceWorker.register("./service-worker.js");
-
+  navigator.serviceWorker.register("./service-worker.js");
 }
-
 window.onerror=function(msg,url,line){
-
-alert(
-"ERROR\n\n"+
-msg+
-"\nBaris : "+
-line
-);
-
+  alert("ERROR\n\n"+ msg + "\nBaris : " + line);
 };
-
 </script>
-
 </body>
-
 </html>
