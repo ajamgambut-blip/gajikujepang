@@ -6,41 +6,28 @@
 <title>💼 GajiKu Jepang</title>
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#111827">
 </head>
 <body>
 <div class="container">
 <header>
   <div class="header-top">
-    <div>
-      <h1>💼 GajiKu Jepang</h1>
-      <p id="subJudul">Pengelola Gaji & Absensi</p>
-    </div>
-    <select id="pilihBahasa" onchange="gantiBahasa()">
-      <option value="id">🇮🇩 ID</option>
-      <option value="en">🇬🇧 EN</option>
-      <option value="jp">🇯🇵 JP</option>
-    </select>
+    <div><h1>💼 GajiKu Jepang</h1><p id="subJudul">Pengelola Gaji & Absensi</p></div>
+    <select id="pilihBahasa" onchange="gantiBahasa()"><option value="id">🇮🇩</option><option value="en">🇬🇧</option><option value="jp">🇯🇵</option></select>
   </div>
 </header>
 
-<!-- DASHBOARD -->
 <section class="card dashboard">
   <h2 id="judulBulan">💴 Pendapatan Bulan Ini</h2>
   <div id="totalGaji" class="total">¥0</div>
   <div id="totalSemua" style="font-size:12px;color:#9ca3af;margin-top:5px">Total Bulan Ini: ¥0</div>
-
   <div class="target-box">
-    <h3 id="judulTarget">🎯 Target Bulanan</h3>
-    <div id="targetText">¥250,000</div>
-    <div class="progress"><div id="progressBar"></div></div>
-    <p id="progressText">0%</p>
+    <h3 id="judulTarget">🎯 Target Bulanan</h3><div id="targetText">¥250,000</div>
+    <div class="progress"><div id="progressBar"></div></div><p id="progressText">0%</p>
     <button onclick="ubahTarget()">✏️ Ubah Target</button>
   </div>
 </section>
 
-<!-- INPUT -->
 <section class="card">
   <h2 id="judulInput">📝 Input Kerja</h2>
   <input type="date" id="tanggal">
@@ -51,78 +38,51 @@
   <button onclick="openPopupDaftarLokasi()" style="background:#8b5cf6">👀 Lihat Daftar Lokasi</button>
 </section>
 
-<!-- STATISTIK -->
 <section class="card">
   <h2 id="judulStatistik">📈 Statistik Bulan Ini</h2>
   <div id="statistik"></div>
 </section>
 
-<!-- PENGELUARAN -->
-<section class="card">
-  <h2 id="judulPengeluaran">💰 Pengeluaran</h2>
-  <input type="text" id="namaPengeluaran" placeholder="Nama">
-  <input type="number" inputmode="numeric" id="jumlahPengeluaran" placeholder="Jumlah">
-  <button onclick="tambahPengeluaran()">Tambah</button>
-  <div id="daftarPengeluaran"></div>
-  <hr>
-  <div id="ringkasanKeuangan"></div>
-</section>
-
-<!-- REKAP BULAN + TOTAL SEJAK AWAL -->
 <section class="card">
   <h2 id="judulRekap">📅 Rekap Bulanan</h2>
-  <div id="rekapBulanan"></div>
+  <button onclick="openPopupRekap()" style="background:#f59e0b">📊 Lihat Riwayat Semua Bulan</button>
   <div id="totalSejakAwal" style="margin-top:12px;padding-top:12px;border-top:1px solid #374151"></div>
   <button onclick="shareLaporan()" style="background:#10b981;margin-top:12px">📤 Share Laporan Bulan Ini</button>
 </section>
 
-<!-- KALENDER -->
 <section class="card">
   <h2 id="judulKalender">🗓️ Kalender</h2>
+  <div class="kalender-nav">
+    <button onclick="gantiBulan(-1)">‹</button>
+    <span id="bulanTahun"></span>
+    <button onclick="gantiBulan(1)">›</button>
+  </div>
   <div id="kalender" class="kalender-grid"></div>
 </section>
 
-<!-- BACKUP -->
 <section class="card">
-  <h2 id="judulBackup">💾 Backup & Restore</h2>
-  <button onclick="exportBackup()">Export Backup</button>
-  <hr>
-  <input type="file" id="importFile" accept=".json">
-  <button onclick="importBackup()">Import Backup</button>
+  <h2 id="judulBackup">💾 Backup</h2>
+  <div style="display:flex; gap:8px">
+    <button onclick="exportBackup()">⬇️ Export</button>
+    <button onclick="document.getElementById('importFile').click()" style="background:#3b82f6">⬆️ Import</button>
+  </div>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup()">
 </section>
 
 </div>
 
-<!-- POPUP TAMBAH LOKASI -->
-<div id="popupLokasi" class="popup">
-  <h3 id="judulTambahLokasi">➕ Tambah Lokasi Baru</h3>
-  <input type="text" id="namaLokasi" placeholder="Nama Lokasi">
-  <input type="number" inputmode="numeric" id="tarifLokasi" placeholder="Tarif">
-  <select id="jenisLokasi">
-    <option value="kamar">Per Kamar</option>
-    <option value="jam">Per Jam</option>
-    <option value="borongan">Borongan</option>
-  </select>
-  <button onclick="simpanLokasiBaru()">💾 Simpan Lokasi</button>
-  <button onclick="closePopupLokasi()" class="btn-danger">Batal</button>
+<div id="popupLokasi" class="popup"><h3 id="judulTambahLokasi">➕ Tambah Lokasi Baru</h3>
+  <input type="text" id="namaLokasi" placeholder="Nama Lokasi"><input type="number" inputmode="numeric" id="tarifLokasi" placeholder="Tarif">
+  <select id="jenisLokasi"><option value="kamar">Per Kamar</option><option value="jam">Per Jam</option><option value="borongan">Borongan</option></select>
+  <button onclick="simpanLokasiBaru()">💾 Simpan</button><button onclick="closePopupLokasi()" class="btn-danger">Batal</button>
 </div>
 
-<!-- POPUP DAFTAR LOKASI -->
-<div id="popupDaftarLokasi" class="popup">
-  <h3 id="judulDaftarLokasi">📋 Daftar Lokasi</h3>
-  <div id="isiDaftarLokasi"></div>
-  <button onclick="closePopupDaftarLokasi()" class="btn-danger">Tutup</button>
-</div>
-
-<div id="popupOverlay2" onclick="closePopupLokasi();closePopupDaftarLokasi()"></div>
+<div id="popupDaftarLokasi" class="popup"><h3 id="judulDaftarLokasi">📋 Daftar Lokasi</h3><div id="isiDaftarLokasi"></div><button onclick="closePopupDaftarLokasi()" class="btn-danger">Tutup</button></div>
+<div id="popupRekap" class="popup"><h3>📊 Riwayat Pemasukan</h3><div id="isiRekap"></div><button onclick="closePopupRekap()" class="btn-danger">Tutup</button></div>
+<div id="popupDetail" class="popup"><h3 id="judulDetail"></h3><div id="isiDetail"></div><button onclick="closePopupDetail()" class="btn-danger">Tutup</button></div>
+<div id="popupOverlay2" onclick="closeSemuaPopup()"></div>
 
 <footer>💼 GajiKu Jepang <br>Design by Anamgambut</footer>
-
 <script src="app.js"></script>
-<script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./service-worker.js");
-}
-</script>
 </body>
 </html>
