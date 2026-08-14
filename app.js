@@ -54,7 +54,6 @@ function tambahPengeluaran() {
   alert('Pengeluaran tersimpan!');
 }
 
-// 3. RENDER KALENDER GRID 7 KOLOM
 function renderKalender() {
   const grid = document.getElementById('kalenderGrid');
   grid.innerHTML = '';
@@ -64,9 +63,11 @@ function renderKalender() {
   const mulai = new Date(y, m, 1).getDay();
 
   // Header Hari
+  let header = '';
   ['Min','Sen','Sel','Rab','Kam','Jum','Sab'].forEach(h=>{
-    grid.innerHTML += `<div style="font-size:11px;color:#9ca3af;font-weight:bold;text-align:center">${h}</div>`;
+    header += `<div style="font-size:11px;color:#9ca3af;font-weight:bold;text-align:center">${h}</div>`;
   });
+  grid.innerHTML = header;
 
   // Kotak Kosong
   for(let i=0; i<mulai; i++) grid.innerHTML += `<div class="tanggal-kosong"></div>`;
