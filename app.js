@@ -1,305 +1,174 @@
-let data = JSON.parse(localStorage.getItem('gajiData')) || [];
-let lokasi = JSON.parse(localStorage.getItem('lokasiData')) || [];
-let pengeluaran = JSON.parse(localStorage.getItem('pengeluaranData')) || [];
-let target = parseInt(localStorage.getItem('targetGaji')) || 250000;
-let riwayatTerbuka = false;
+let db = { kerja: {}, pengeluaran: [] };
 
-function getBulanIni() {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+// Load data dari localStorage pas buka
+window.onload = () => {
+  const saved = localStorage.getItem('laporanKerjaDB');
+  if(saved) db = JSON.parse(saved);
+  renderSemua();
+};
+
+// Simpan ke localStorage
+function simpan() {
+  localStorage.setItem('laporanKerjaDB', JSON.stringify(db));
 }
 
-function simpanSemua() {
-    localStorage.setItem('gajiData', JSON.stringify(data));
-    localStorage.setItem('lokasiData', JSON.stringify(lokasi));
-    localStorage.setItem('pengeluaranData', JSON.stringify(pengeluaran));
-    localStorage.setItem('targetGaji', target);
+// Render semua bagian
+function renderSemua() {
+  renderKalender();
+  renderStatistik();
+  renderRiwayatSingkat();
 }
 
-function showPopup(text) {
-    document.getElementById('popupText').innerHTML = `<p>${text}</p>`;
-    document.getElementById('popupOverlay').style.display = 'block';
-    document.getElementById('popup').style.display = 'block';
+// 1. TAMBAH KERJA
+function tambahKerja() {
+  const tanggal = document.getElementById('tanggal').value;
+  const jam = document.getElementById('jam').value;
+  const deskripsi = document.getElementById('deskripsi').value;
+  const total = parseFloat(document.getElementById('total').value);
+
+  if(!tanggal ||!jam ||!deskripsi ||!total) return alert('Isi semua dulu');
+
+  if(!db.kerja[tanggal]) db.kerja[tanggal] = [];
+  db.kerja[tanggal].push({ jam, deskripsi, total });
+
+  simpan();
+  renderSemua();
+  document.getElementById('deskripsi').value = '';
+  document.getElementById('total').value = '';
+  alert('Data kerja tersimpan!');
 }
 
-function closePopup() {
-    document.getElementById('popupOverlay').style.display = 'none';
-    document.getElementById('popup').style.display = 'none';
-}
-
-function toggleRiwayat() {
-    riwayatTerbuka =!riwayatTerbuka;
-    const div = document.getElementById('riwayat');
-    const btn = document.getElementById('btnToggleRiwayat');
-    if(riwayatTerbuka) {
-        div.style.display = 'block';
-        btn.innerText = '🙈 Sembunyikan Riwayat';
-        renderRiwayat();
-    } else {
-        div.style.display = 'none';
-        btn.innerText = '🔍 Lihat Semua Riwayat';
-    }
-}
-
-function tambahLokasi() {
-    const nama = document.getElementById('namaLokasi').value.trim();
-    const tarif = parseInt(document.getElementById('tarifLokasi').value) || 0;
-    const jenis = document.getElementById('jenisLokasi').value;
-    if(!nama ||!tarif) return alert('Isi Nama & Tarif!');
-    lokasi.push({id:Date.now(), nama, tarif, jenis});
-    simpanSemua(); renderLokasi(); renderSelectLokasi();
-    document.getElementById('namaLokasi').value='';
-    document.getElementById('tarifLokasi').value='';
-    showPopup('Lokasi berhasil ditambah!');
-}
-
-function renderLokasi() {
-    const div = document.getElementById('daftarLokasi');
-    div.innerHTML = '';
-    if(lokasi.length === 0) div.innerHTML = '<p style="color:#9ca3af">Belum ada lokasi</p>';
-    lokasi.forEach(l => {
-        div.innerHTML += `<div style="display:flex;justify-content:space-between;margin:5px 0;padding:8px;background:#1f2937;border-radius:6px">${l.nama} - ¥${l.tarif.toLocaleString()} /${l.jenis} <button onclick="hapusLokasi(${l.id})" style="background:#ef4444;border:none;color:white;padding:2px 8px;border-radius:4px;cursor:pointer">Hapus</button></div>`;
-    });
-}
-
-function hapusLokasi(id){
-    if(!confirm('Hapus lokasi ini?')) return;
-    lokasi = lokasi.filter(l=>l.id!=id);
-    simpanSemua(); renderLokasi(); renderSelectLokasi();
-}
-
-function renderSelectLokasi() {
-    const select = document.getElementById('lokasi');
-    select.innerHTML = '<option value="">Pilih Lokasi</option>';
-    lokasi.forEach(l => {
-        select.innerHTML += `<option value="${l.id}">${l.nama}</option>`;
-    });
-}
-
-function tambahData() {
-    const tanggal = document.getElementById('tanggal').value;
-    const idLokasi = document.getElementById('lokasi').value;
-    const jumlah = parseFloat(document.getElementById('jumlah').value) || 0;
-    if(!tanggal ||!idLokasi ||!jumlah) return alert('Isi semua data!');
-    const lok = lokasi.find(l=>l.id==idLokasi);
-    const gaji = lok.tarif * jumlah;
-    data.push({id:Date.now(), tanggal, lokasi:lok.nama, jumlah, gaji});
-    simpanSemua(); render();
-    showPopup(`Data tersimpan! +¥${gaji.toLocaleString()}`);
-    document.getElementById('jumlah').value='';
-}
-
-function render() {
-    renderTotal();
-    renderStatistik();
-    renderRekap();
-    renderKalender();
-    renderPengeluaran();
-    renderRekapBulanan();
-    if(riwayatTerbuka) renderRiwayat();
-}
-
-function renderTotal() {
-    const bulanIni = getBulanIni();
-    let totalBulanIni = 0;
-    data.forEach(item => {
-        if(item.tanggal.substring(0,7) === bulanIni){
-            totalBulanIni += item.gaji;
-        }
-    });
-    document.getElementById('totalGaji').innerText = `¥${totalBulanIni.toLocaleString()}`;
-
-    let totalSemua = data.reduce((a,b)=>a+b.gaji,0);
-    document.getElementById('totalSemua').innerText = `Total Semua: ¥${totalSemua.toLocaleString()}`;
-
-    const persen = target > 0? (totalBulanIni / target * 100).toFixed(0) : 0;
-    document.getElementById('progressBar').style.width = `${persen>100?100:persen}%`;
-    document.getElementById('progressText').innerText = `${persen}%`;
-    document.getElementById('targetText').innerText = `¥${parseInt(target).toLocaleString()}`;
-}
-
-function ubahTarget() {
-    const baru = prompt("Masukkan Target Bulanan Baru:", target);
-    if(baru &&!isNaN(baru)) {
-        target = parseInt(baru);
-        simpanSemua(); renderTotal();
-        showPopup(`Target diubah ke ¥${target.toLocaleString()}`);
-    }
-}
-
-function renderRiwayat() {
-    const bulan = document.getElementById('filterBulan').value;
-    const div = document.getElementById('riwayat');
-    div.innerHTML = '';
-    let filterData = bulan? data.filter(d=>d.tanggal.substring(0,7)==bulan) : data;
-    if(filterData.length === 0) div.innerHTML = '<p style="color:#9ca3af">Belum ada data</p>';
-    filterData.sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).forEach(d=>{
-        div.innerHTML += `<div style="padding:8px;border-bottom:1px solid #374151;display:flex;justify-content:space-between">${d.tanggal} - ${d.lokasi} - ${d.jumlah} <b>¥${d.gaji.toLocaleString()}</b></div>`;
-    });
-}
-
-function renderStatistik() {
-    const bulanIni = getBulanIni();
-    const dataBulanIni = data.filter(d=>d.tanggal.substring(0,7)===bulanIni);
-    const totalHari = new Set(dataBulanIni.map(d=>d.tanggal)).size;
-    const rata2 = dataBulanIni.length > 0? (dataBulanIni.reduce((a,b)=>a+b.gaji,0)/dataBulanIni.length).toFixed(0) : 0;
-    document.getElementById('statistik').innerHTML = `
-        Total Hari Kerja: <b>${totalHari} hari</b><br>
-        Total Job: <b>${dataBulanIni.length} kali</b><br>
-        Rata-rata/job: <b>¥${parseInt(rata2).toLocaleString()}</b>
-    `;
-}
-
-function renderRekap() {
-    const rekap = {};
-    data.forEach(d=>{
-        rekap[d.lokasi] = (rekap[d.lokasi]||0) + d.gaji;
-    });
-    let html = '';
-    if(Object.keys(rekap).length === 0) html = '<p style="color:#9ca3af">Belum ada data</p>';
-    for(let k in rekap) html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #374151">${k}: <b>¥${rekap[k].toLocaleString()}</b></div>`;
-    document.getElementById('rekapLokasi').innerHTML = html;
-}
-
-function renderRekapBulanan() {
-    const rekapBulan = {};
-    data.forEach(d=>{
-        const bln = d.tanggal.substring(0,7);
-        rekapBulan[bln] = (rekapBulan[bln]||0) + d.gaji;
-    });
-    let html = '';
-    if(Object.keys(rekapBulan).length === 0) html = '<p style="color:#9ca3af">Belum ada data</p>';
-    Object.keys(rekapBulan).sort().reverse().forEach(bln => {
-        html += `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #374151">${bln}: <b>¥${rekapBulan[bln].toLocaleString()}</b></div>`;
-    });
-    document.getElementById('rekapBulanan').innerHTML = html;
-}
-
+// 2. TAMBAH PENGELUARAN
 function tambahPengeluaran() {
-    const nama = document.getElementById('namaPengeluaran').value.trim();
-    const jumlah = parseInt(document.getElementById('jumlahPengeluaran').value) || 0;
-    if(!nama ||!jumlah) return alert('Isi Nama & Jumlah!');
-    pengeluaran.push({id:Date.now(), nama, jumlah});
-    simpanSemua(); renderPengeluaran();
-    document.getElementById('namaPengeluaran').value='';
-    document.getElementById('jumlahPengeluaran').value='';
-    showPopup('Pengeluaran ditambah!');
+  const tanggal = document.getElementById('tglPengeluaran').value;
+  const nama = document.getElementById('namaPengeluaran').value;
+  const jumlah = parseFloat(document.getElementById('jumlahPengeluaran').value);
+
+  if(!tanggal ||!nama ||!jumlah) return alert('Isi semua dulu');
+
+  db.pengeluaran.push({ tanggal, nama, jumlah });
+  simpan();
+  renderStatistik();
+  document.getElementById('namaPengeluaran').value = '';
+  document.getElementById('jumlahPengeluaran').value = '';
+  alert('Pengeluaran tersimpan!');
 }
 
-function renderPengeluaran() {
-    const div = document.getElementById('daftarPengeluaran');
-    div.innerHTML = '';
-    let totalKeluar = 0;
-    if(pengeluaran.length === 0) div.innerHTML = '<p style="color:#9ca3af">Belum ada pengeluaran</p>';
-    pengeluaran.forEach(p=>{
-        totalKeluar += p.jumlah;
-        div.innerHTML += `<div style="display:flex;justify-content:space-between;padding:6px 0">${p.nama}: ¥${p.jumlah.toLocaleString()} <button onclick="hapusPengeluaran(${p.id})" style="background:#ef4444;border:none;color:white;padding:2px 6px;border-radius:4px;cursor:pointer">X</button></div>`;
-    });
-    const bulanIni = getBulanIni();
-    const totalMasuk = data.filter(d=>d.tanggal.substring(0,7)===bulanIni).reduce((a,b)=>a+b.gaji,0);
-    document.getElementById('ringkasanKeuangan').innerHTML = `
-        Pemasukan: ¥${totalMasuk.toLocaleString()}<br>
-        Pengeluaran: ¥${totalKeluar.toLocaleString()}<br>
-        <b style="color:#34d399;font-size:18px">Sisa: ¥${(totalMasuk-totalKeluar).toLocaleString()}</b>
-    `;
-}
-
-function hapusPengeluaran(id){
-    if(!confirm('Hapus pengeluaran ini?')) return;
-    pengeluaran = pengeluaran.filter(p=>p.id!=id);
-    simpanSemua(); renderPengeluaran();
-}
-
+// 3. RENDER KALENDER GRID 7 KOLOM
 function renderKalender() {
-    const grid = document.getElementById('kalender');
-    grid.innerHTML = '';
-    const bulanIni = getBulanIni();
-    const dataBulanIni = data.filter(d=>d.tanggal.substring(0,7)===bulanIni);
-    const hariKerja = [...new Set(dataBulanIni.map(d=>d.tanggal))];
+  const grid = document.getElementById('kalenderGrid');
+  grid.innerHTML = '';
+  const d = new Date();
+  const y = d.getFullYear(), m = d.getMonth();
+  const jmlHari = new Date(y, m + 1, 0).getDate();
+  const mulai = new Date(y, m, 1).getDay();
 
-    if(hariKerja.length === 0) {
-        grid.innerHTML = '<p style="color:#9ca3af">Belum ada data bulan ini</p>';
-        return;
+  // Header Hari
+  ['Min','Sen','Sel','Rab','Kam','Jum','Sab'].forEach(h=>{
+    grid.innerHTML += `<div style="font-size:11px;color:#9ca3af;font-weight:bold;text-align:center">${h}</div>`;
+  });
+
+  // Kotak Kosong
+  for(let i=0; i<mulai; i++) grid.innerHTML += `<div class="tanggal-kosong"></div>`;
+
+  // Tanggal 1-31
+  for(let t=1; t<=jmlHari; t++){
+    const key = `${y}-${String(m+1).padStart(2,'0')}-${String(t).padStart(2,'0')}`;
+    const data = db.kerja[key] || [];
+    const total = data.reduce((a,b)=>a+b.total,0);
+    const adaKerja = total > 0? 'ada-kerja' : '';
+
+    grid.innerHTML += `
+      <div class="kalender-item ${adaKerja}" onclick="lihatDetail('${key}', ${t})">
+        <b>${t}</b>
+        <small>${total?'¥'+total.toLocaleString():'-'}</small>
+      </div>
+    `;
+  }
+}
+
+// 4. POPUP RIWAYAT KETIKA KLIK TANGGAL
+function lihatDetail(key, tgl) {
+  const data = db.kerja[key] || [];
+
+  if(data.length === 0){
+    alert(`Tanggal ${tgl}\nBelum ada kerjaan`);
+    return;
+  }
+
+  let teks = `Riwayat Tanggal ${tgl}\n\n`;
+  let total = 0;
+
+  data.forEach((d, i) => {
+    teks += `${i+1}. ${d.jam} - ${d.deskripsi}\n`;
+    teks += ` ¥${d.total.toLocaleString()}\n\n`;
+    total += d.total;
+  });
+
+  teks += `TOTAL: ¥${total.toLocaleString()}`;
+  alert(teks);
+}
+
+// 5. RENDER STATISTIK
+function renderStatistik() {
+  const d = new Date();
+  const bulanIni = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+
+  let totalPemasukan = 0;
+  let totalPengeluaran = 0;
+
+  Object.keys(db.kerja).forEach(key => {
+    if(key.startsWith(bulanIni)){
+      db.kerja[key].forEach(k => totalPemasukan += k.total);
     }
+  });
 
-    hariKerja.sort().reverse().forEach(tgl => {
-        const totalGajiTgl = dataBulanIni.filter(d=>d.tanggal===tgl).reduce((a,b)=>a+b.gaji,0);
-        grid.innerHTML += `
-            <div onclick="showDetailTanggal('${tgl}')"
-                 style="background:#059669;padding:10px;border-radius:8px;text-align:center;cursor:pointer;min-width:70px">
-                <div style="font-weight:bold;font-size:18px">${tgl.substring(8,10)}</div>
-                <div style="font-size:10px">¥${totalGajiTgl.toLocaleString()}</div>
-            </div>
-        `;
-    });
+  db.pengeluaran.forEach(p => {
+    if(p.tanggal.startsWith(bulanIni)) totalPengeluaran += p.jumlah;
+  });
+
+  document.getElementById('totalPemasukan').innerText = '¥' + totalPemasukan.toLocaleString();
+  document.getElementById('totalPengeluaran').innerText = '¥' + totalPengeluaran.toLocaleString();
+  document.getElementById('totalBersih').innerText = '¥' + (totalPemasukan - totalPengeluaran).toLocaleString();
 }
 
-function showDetailTanggal(tanggal) {
-    const dataTgl = data.filter(d=>d.tanggal===tanggal);
-    let totalTgl = dataTgl.reduce((a,b)=>a+b.gaji,0);
+// 6. RENDER RIWAYAT 5 TERAKHIR
+function renderRiwayatSingkat() {
+  const list = document.getElementById('riwayatList');
+  list.innerHTML = '';
+  let semua = [];
 
-    let html = `<h3 style="margin-bottom:10px">📅 ${tanggal}</h3>`;
-    html += `<p style="color:#34d399;margin-bottom:12px">Total: ¥${totalTgl.toLocaleString()}</p>`;
+  Object.keys(db.kerja).forEach(key => {
+    db.kerja[key].forEach(k => semua.push({...k, tanggal: key }));
+  });
 
-    dataTgl.forEach(d=>{
-        html += `
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #374151">
-            <div>
-                <b>${d.lokasi}</b><br>
-                <span style="color:#9ca3af;font-size:12px">${d.jumlah} ${d.jenis || 'item'}</span>
-            </div>
-            <b>¥${d.gaji.toLocaleString()}</b>
-        </div>`;
-    });
-
-    html += `<button onclick="hapusHari('${tanggal}')" style="background:#ef4444;margin-top:12px">🗑️ Hapus Semua Tanggal Ini</button>`;
-
-    document.getElementById('popupText').innerHTML = html;
-    document.getElementById('popupOverlay').style.display = 'block';
-    document.getElementById('popup').style.display = 'block';
+  semua.sort((a,b) => b.tanggal.localeCompare(a.tanggal)).slice(0,5).forEach(k => {
+    list.innerHTML += `<div style="padding:8px;border-bottom:1px solid #374151">
+      <b>${k.tanggal}</b> - ${k.deskripsi}<br>
+      <small>${k.jam} | ¥${k.total.toLocaleString()}</small>
+    </div>`;
+  });
 }
 
-function hapusHari(tanggal) {
-    if(!confirm(`Hapus semua data tanggal ${tanggal}?`)) return;
-    data = data.filter(d=>d.tanggal!== tanggal);
-    simpanSemua(); render(); closePopup();
-    showPopup(`Data tanggal ${tanggal} dihapus`);
+// 7. BACKUP & RESTORE
+function backupData() {
+  const dataStr = JSON.stringify(db);
+  const blob = new Blob([dataStr], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `backup-laporan-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
 }
 
-function exportBackup() {
-    const blob = new Blob([JSON.stringify({data,lokasi,pengeluaran,target})], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `backup-gajiku-${getBulanIni()}.json`;
-    a.click();
-    showPopup('Backup berhasil diunduh!');
+function restoreData(event) {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    db = JSON.parse(e.target.result);
+    simpan();
+    renderSemua();
+    alert('Data berhasil direstore!');
+  };
+  reader.readAsText(file);
 }
-
-function importBackup() {
-    const file = document.getElementById('importFile').files[0];
-    if(!file) return alert('Pilih file dulu!');
-    const reader = new FileReader();
-    reader.onload = e => {
-        try {
-            const backup = JSON.parse(e.target.result);
-            data=backup.data||[];
-            lokasi=backup.lokasi||[];
-            pengeluaran=backup.pengeluaran||[];
-            target=backup.target||250000;
-            simpanSemua(); render();
-            renderLokasi(); renderSelectLokasi();
-            showPopup('Restore berhasil!');
-        } catch(err) {
-            alert('File backup tidak valid!');
-        }
-    }
-    reader.readAsText(file);
-}
-
-// INIT
-document.getElementById('targetText').innerText = `¥${parseInt(target).toLocaleString()}`;
-document.getElementById('tanggal').valueAsDate = new Date();
-document.getElementById('filterBulan').value = getBulanIni();
-renderLokasi();
-renderSelectLokasi();
-render();
