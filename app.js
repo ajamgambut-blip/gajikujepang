@@ -1433,50 +1433,34 @@ function simpanEdit() {
    STATISTIK
    ========================================================= */
 
+
 function renderPopupStatistik() {
-
   const bulanIni =
-    `${bulanAktif.getFullYear()}-${
-      String(
-        bulanAktif.getMonth() + 1
-      ).padStart(2, '0')
-    }`;
+    `${bulanAktif.getFullYear()}-${String(
+      bulanAktif.getMonth() + 1
+    ).padStart(2, '0')}`;
 
+  const dataBulanIni = db.data.filter(
+    x => x.tanggal.startsWith(bulanIni)
+  );
 
-  const dataBulanIni =
-    db.data.filter(
-      x =>
-        x.tanggal.startsWith(
-          bulanIni
-        )
-    );
+  const jmlHari = new Date(
+    bulanAktif.getFullYear(),
+    bulanAktif.getMonth() + 1,
+    0
+  ).getDate();
 
+  // Total tanggal kerja unik untuk semua lokasi
+  const hariKerja = [
+    ...new Set(
+      dataBulanIni
+        .filter(x => x.tanggal)
+        .map(x => x.tanggal)
+    )
+  ].length;
 
-  const jmlHari =
-    new Date(
-      bulanAktif.getFullYear(),
-      bulanAktif.getMonth() + 1,
-      0
-    ).getDate();
-
-
-  const hariKerja =
-    [
-      ...new Set(
-        dataBulanIni.map(
-          x => x.tanggal
-        )
-      )
-    ].length;
-
-
-  const hariLibur =
-    jmlHari - hariKerja;
-
-
-  const b =
-    bahasa[db.bahasa];
-
+  const hariLibur = jmlHari - hariKerja;
+  const b = bahasa[db.bahasa] || bahasa.id;
 
   const locale =
     db.bahasa === 'jp'
@@ -1485,183 +1469,96 @@ function renderPopupStatistik() {
         ? 'en-US'
         : 'id-ID';
 
-
-  const namaBulan =
-    bulanAktif.toLocaleString(
-      locale,
-      {
-        month: 'long',
-        year: 'numeric'
-      }
-    );
-
+  const namaBulan = bulanAktif.toLocaleString(
+    locale,
+    { month: 'long', year: 'numeric' }
+  );
 
   let html = `
-
     <div class="stat-item">
-
       <span>Bulan</span>
-
       <b>${namaBulan}</b>
-
     </div>
 
     <div class="stat-item">
-
       <span>${b.hariKerja}</span>
-
       <b>${hariKerja} hari</b>
-
     </div>
 
     <div class="stat-item">
-
       <span>${b.hariLibur}</span>
-
       <b>${hariLibur} hari</b>
-
     </div>
-
   `;
 
-
-  if (
-    dataBulanIni.length > 0
-  ) {
-
-    html +=
-      `<hr style="border-color:#374151;margin:12px 0">`;
-
+  if (dataBulanIni.length > 0) {
+    html += '<hr style="border-color:#374151;margin:12px 0">';
   }
-
 
   db.lokasi.forEach(l => {
+    const dataLokasi = dataBulanIni.filter(
+      x => Number(x.lokasiId) === Number(l.id)
+    );
 
-    const dataLokasi =
-      dataBulanIni.filter(
-        x =>
-          Number(x.lokasiId) ===
-          Number(l.id)
-      );
+    if (dataLokasi.length === 0) return;
 
+    // Jumlah hari unik untuk lokasi ini
+    const hariLokasi = [
+      ...new Set(
+        dataLokasi
+          .filter(x => x.tanggal)
+          .map(x => x.tanggal)
+      )
+    ].length;
 
-    const total =
-      dataLokasi.reduce(
-        (a, b) =>
-          a + Number(b.total || 0),
-        0
-      );
+    const total = dataLokasi.reduce(
+      (a, x) => a + Number(x.total || 0),
+      0
+    );
 
+    const jumlah = dataLokasi.reduce(
+      (a, x) => a + Number(x.jumlah || 0),
+      0
+    );
 
-    const jumlah =
-      dataLokasi.reduce(
-        (a, b) =>
-          a + Number(b.jumlah || 0),
-        0
-      );
+    let rincian = '';
 
-
-    if (jumlah <= 0) {
-      return;
+    if (l.jenis === 'jam') {
+      rincian = `${jumlah.toLocaleString()} jam`;
+    } else if (l.jenis === 'kamar') {
+      rincian = `${jumlah.toLocaleString()} kamar`;
+    } else {
+      rincian = `${dataLokasi.length} kali`;
     }
 
+    html += `
+      <div class="stat-item">
+        <span>
+          <b>${escapeHTML(l.nama)}</b>
+          <br>
+          <small>${hariLokasi} hari kerja</small>
+          <br>
+          <small>${rincian}</small>
+        </span>
 
-    if (
-      l.jenis === 'jam'
-    ) {
-
-      html += `
-
-        <div class="stat-item">
-
-          <span>
-            ${escapeHTML(l.nama)}
-            - ${b.totalJam}
-          </span>
-
-          <b>
-            ${jumlah} jam
-            <br>
-            ¥${total.toLocaleString()}
-          </b>
-
-        </div>
-
-      `;
-
-    }
-
-
-    if (
-      l.jenis === 'kamar'
-    ) {
-
-      html += `
-
-        <div class="stat-item">
-
-          <span>
-            ${escapeHTML(l.nama)}
-            - ${b.totalKamar}
-          </span>
-
-          <b>
-            ${jumlah} kamar
-            <br>
-            ¥${total.toLocaleString()}
-          </b>
-
-        </div>
-
-      `;
-
-    }
-
-
-    if (
-      l.jenis === 'borongan'
-    ) {
-
-      html += `
-
-        <div class="stat-item">
-
-          <span>
-            ${escapeHTML(l.nama)}
-          </span>
-
-          <b>
-            ${dataLokasi.length} kali
-            <br>
-            ¥${total.toLocaleString()}
-          </b>
-
-        </div>
-
-      `;
-
-    }
-
+        <b style="text-align:right">
+          ¥${total.toLocaleString()}
+        </b>
+      </div>
+    `;
   });
 
-
-  if (
-    dataBulanIni.length === 0
-  ) {
-
-    html =
-      '<p style="color:#9ca3af;text-align:center">' +
-      'Belum ada data di bulan ini' +
-      '</p>';
-
+  if (dataBulanIni.length === 0) {
+    html = `
+      <p style="color:#9ca3af;text-align:center">
+        Belum ada data di bulan ini
+      </p>
+    `;
   }
 
-
-  document.getElementById(
-    'isiStatistikPopup'
-  ).innerHTML =
-    html;
+  document.getElementById('isiStatistikPopup').innerHTML = html;
 }
+
 
 
 /* =========================================================
