@@ -80,7 +80,6 @@ const bahasa = {
 /* =========================================================
    START APP
    ========================================================= */
-
 window.onload = function () {
   loadDatabase();
 
@@ -92,6 +91,8 @@ window.onload = function () {
 
   updateBahasaUI();
   renderSemua();
+
+  cekPengingatBackupBulanan();
 };
 
 /* =========================================================
@@ -1217,6 +1218,61 @@ ${totalJam.toLocaleString()} jam`;
   }
 }
 
+/* =========================================================
+   PENGINGAT BACKUP BULANAN
+   ========================================================= */
+
+function cekPengingatBackupBulanan() {
+  const sekarang = new Date();
+
+  const bulanSekarang =
+    `${sekarang.getFullYear()}-${String(
+      sekarang.getMonth() + 1
+    ).padStart(2, '0')}`;
+
+  const bulanTerakhir = localStorage.getItem(
+    'gajikuBulanTerakhirDibuka'
+  );
+
+  // Pertama kali aplikasi dibuka
+  if (!bulanTerakhir) {
+    localStorage.setItem(
+      'gajikuBulanTerakhirDibuka',
+      bulanSekarang
+    );
+    return;
+  }
+
+  // Belum berganti bulan
+  if (bulanTerakhir === bulanSekarang) {
+    return;
+  }
+
+  // Simpan bulan sekarang agar popup tidak muncul berulang
+  localStorage.setItem(
+    'gajikuBulanTerakhirDibuka',
+    bulanSekarang
+  );
+
+  // Jika tidak ada data, tidak perlu mengingatkan
+  if (
+    db.data.length === 0 &&
+    db.pengeluaran.length === 0
+  ) {
+    return;
+  }
+
+  const lanjut = confirm(
+    '🔔 JANGAN LUPA BACKUP DATA YA !\n\n' +
+    'Bulan sudah berganti.\n\n' +
+    'Amankan seluruh data GajiKu kamu sebelum terjadi sesuatu pada HP atau browser.\n\n' +
+    'Tekan OK untuk membuat backup sekarang.'
+  );
+
+  if (lanjut) {
+    exportBackup();
+  }
+}
 /* =========================================================
    EXPORT BACKUP
    ========================================================= */
