@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -19,7 +20,7 @@
           <p id="judulHeaderBulan">Catatan gaji bulanan</p>
         </div>
 
-        <select id="pilihanBahasa" onchange="gantiBahasa(this.value)">
+        <select id="pilihBahasa" onchange="gantiBahasa()">
           <option value="id">🇮🇩 Indonesia</option>
           <option value="en">🇬🇧 English</option>
           <option value="jp">🇯🇵 日本語</option>
@@ -29,10 +30,12 @@
       <div class="total-card">
         <p id="labelTotalGaji">Total Gaji Bulan Ini</p>
         <h2 id="totalGaji">¥0</h2>
+
         <div class="target-info">
           <span id="targetText">Target: ¥250,000</span>
           <span id="progressText">0%</span>
         </div>
+
         <div class="progress-container">
           <div id="progressBar" class="progress-bar"></div>
         </div>
@@ -63,19 +66,35 @@
 
     <!-- TOMBOL UTAMA -->
     <section class="main-actions">
-      <button type="button" class="primary-button" onclick="openPopupInputDariDetail()">
+      <button
+        type="button"
+        class="primary-button"
+        onclick="openPopupInputDariDetail()"
+      >
         ＋ Tambah Gaji
       </button>
 
-      <button type="button" class="secondary-button" onclick="openPopupLokasi()">
+      <button
+        type="button"
+        class="secondary-button"
+        onclick="openPopupLokasi()"
+      >
         ⚙ Kelola Lokasi
       </button>
 
-      <button type="button" class="secondary-button" onclick="openPopupStatistik()">
+      <button
+        type="button"
+        class="secondary-button"
+        onclick="openPopupStatistik()"
+      >
         📊 Statistik
       </button>
 
-      <button type="button" class="secondary-button" onclick="openPopupRekap()">
+      <button
+        type="button"
+        class="secondary-button"
+        onclick="openPopupRekap()"
+      >
         📋 Rekap Bulanan
       </button>
     </section>
@@ -86,6 +105,7 @@
         <h3>🎯 Target Gaji</h3>
         <button type="button" onclick="ubahTarget()">Ubah Target</button>
       </div>
+
       <p id="targetTextDetail">Target bulanan: ¥250,000</p>
     </section>
 
@@ -93,24 +113,32 @@
     <section id="ringkasanKeuangan" class="finance-section">
       <div class="section-heading">
         <h3>💰 Ringkasan Keuangan</h3>
-        <button type="button" onclick="openPopupPengeluaran()">＋ Pengeluaran</button>
+
+        <button
+          type="button"
+          onclick="openPopupPengeluaran()"
+        >
+          ＋ Pengeluaran
+        </button>
       </div>
 
       <div class="finance-summary-grid">
+
         <div class="finance-summary-item">
           <span>Gaji Kotor</span>
-          <strong id="totalGajiKotor">¥0</strong>
+          <strong id="ringkasanGaji">¥0</strong>
         </div>
 
         <div class="finance-summary-item">
           <span>Total Pengeluaran</span>
-          <strong id="totalPengeluaranBulan">¥0</strong>
+          <strong id="ringkasanPengeluaran">¥0</strong>
         </div>
 
         <div class="finance-summary-item net-summary">
           <span>Gaji Bersih</span>
-          <strong id="totalGajiBersih">¥0</strong>
+          <strong id="gajiBersih">¥0</strong>
         </div>
+
       </div>
 
       <button
@@ -122,8 +150,12 @@
         Lihat rincian pengeluaran ▼
       </button>
 
-      <div id="rincianKeuangan" class="finance-details" style="display:none;">
-        <div id="isiDaftarPengeluaran">
+      <div
+        id="rincianKeuangan"
+        class="finance-details"
+        style="display:none;"
+      >
+        <div id="daftarPengeluaran">
           <p>Belum ada pengeluaran bulan ini.</p>
         </div>
       </div>
@@ -138,7 +170,10 @@
           📥 Export Backup
         </button>
 
-        <button type="button" onclick="document.getElementById('importFile').click()">
+        <button
+          type="button"
+          onclick="document.getElementById('importFile').click()"
+        >
           📤 Import Backup
         </button>
 
@@ -148,29 +183,40 @@
           accept=".json,application/json"
           onchange="importBackup(event)"
           hidden
-        />
+        >
       </div>
 
-      <button type="button" class="share-button" onclick="shareLaporan()">
+      <button
+        type="button"
+        class="share-button"
+        onclick="shareLaporan()"
+      >
         📲 Bagikan Laporan Bulanan
       </button>
     </section>
 
     <footer class="app-footer">
-      <p>GajiKu Jepang © 2026</p>
-    </footer>
+  <p>GajiKu Jepang © 2026</p>
+  <p>Developed by Anamgambut</p>
+</footer>
+
   </div>
 
   <!-- OVERLAY -->
-  <div id="popupOverlay2" class="popup-overlay" onclick="closeSemuaPopup()"></div>
+  <div
+    id="popupOverlay2"
+    class="popup-overlay"
+    onclick="closeSemuaPopup()"
+  ></div>
 
   <!-- POPUP DETAIL TANGGAL -->
   <div id="popupDetail" class="popup">
     <div class="popup-header">
-      <h3 id="judulPopupDetail">Detail Gaji</h3>
+      <h3 id="judulDetail">Detail Gaji</h3>
       <button type="button" onclick="closePopupDetail()">✕</button>
     </div>
-    <div id="isiPopupDetail"></div>
+
+    <div id="isiDetail"></div>
   </div>
 
   <!-- POPUP INPUT GAJI -->
@@ -181,6 +227,9 @@
     </div>
 
     <div class="popup-content">
+
+      <p id="inputTanggalText"></p>
+
       <label for="inputTanggal">Tanggal</label>
       <input type="date" id="inputTanggal">
 
@@ -207,11 +256,19 @@
       >
 
       <label for="inputCatatan">Catatan</label>
-      <textarea id="inputCatatan" placeholder="Catatan tambahan (opsional)"></textarea>
+      <textarea
+        id="inputCatatan"
+        placeholder="Catatan tambahan (opsional)"
+      ></textarea>
 
-      <button type="button" class="primary-button" onclick="simpanDataDariPopup()">
+      <button
+        type="button"
+        class="primary-button"
+        onclick="simpanDataDariPopup()"
+      >
         Simpan Gaji
       </button>
+
     </div>
   </div>
 
@@ -223,6 +280,7 @@
     </div>
 
     <div class="popup-content">
+
       <input type="hidden" id="editId">
 
       <label for="editTanggal">Tanggal</label>
@@ -232,7 +290,12 @@
       <select id="editLokasi"></select>
 
       <label for="editJumlah">Jumlah Kamar / Jam</label>
-      <input type="number" id="editJumlah" min="0" step="0.5">
+      <input
+        type="number"
+        id="editJumlah"
+        min="0"
+        step="0.5"
+      >
 
       <label for="editGaji">Total Gaji (¥)</label>
       <input type="number" id="editGaji" min="0">
@@ -240,9 +303,14 @@
       <label for="editCatatan">Catatan</label>
       <textarea id="editCatatan"></textarea>
 
-      <button type="button" class="primary-button" onclick="simpanEdit()">
+      <button
+        type="button"
+        class="primary-button"
+        onclick="simpanEdit()"
+      >
         Simpan Perubahan
       </button>
+
     </div>
   </div>
 
@@ -250,11 +318,17 @@
   <div id="popupPengeluaran" class="popup">
     <div class="popup-header">
       <h3 id="judulPopupPengeluaran">Tambah Pengeluaran</h3>
-      <button type="button" onclick="closePopupPengeluaran()">✕</button>
+      <button
+        type="button"
+        onclick="closePopupPengeluaran()"
+      >
+        ✕
+      </button>
     </div>
 
     <div class="popup-content">
-      <input type="hidden" id="pengeluaranEditId">
+
+      <input type="hidden" id="pengeluaranId">
 
       <label for="pengeluaranTanggal">Tanggal</label>
       <input type="date" id="pengeluaranTanggal">
@@ -282,6 +356,7 @@
       >
         Simpan Pengeluaran
       </button>
+
     </div>
   </div>
 
@@ -289,8 +364,14 @@
   <div id="popupStatistik" class="popup">
     <div class="popup-header">
       <h3>📊 Statistik Bulanan</h3>
-      <button type="button" onclick="closePopupStatistik()">✕</button>
+      <button
+        type="button"
+        onclick="closePopupStatistik()"
+      >
+        ✕
+      </button>
     </div>
+
     <div id="isiStatistikPopup" class="popup-content"></div>
   </div>
 
@@ -298,30 +379,54 @@
   <div id="popupLokasi" class="popup">
     <div class="popup-header">
       <h3>⚙ Tambah Lokasi Kerja</h3>
-      <button type="button" onclick="closePopupLokasi()">✕</button>
+      <button
+        type="button"
+        onclick="closePopupLokasi()"
+      >
+        ✕
+      </button>
     </div>
 
     <div class="popup-content">
-      <label for="namaLokasi">Nama Lokasi</label>
-      <input type="text" id="namaLokasi" placeholder="Contoh: HOTEL EAST">
 
-      <label for="tipeLokasi">Tipe Perhitungan</label>
-      <select id="tipeLokasi">
+      <label for="namaLokasi">Nama Lokasi</label>
+      <input
+        type="text"
+        id="namaLokasi"
+        placeholder="Contoh: HOTEL EAST"
+      >
+
+      <label for="jenisLokasi">Tipe Perhitungan</label>
+      <select id="jenisLokasi">
         <option value="kamar">Per Kamar</option>
         <option value="jam">Per Jam</option>
-        <option value="manual">Manual</option>
+        <option value="borongan">Borongan / Manual</option>
       </select>
 
       <label for="tarifLokasi">Tarif (¥)</label>
-      <input type="number" id="tarifLokasi" min="0" placeholder="Contoh: 800">
+      <input
+        type="number"
+        id="tarifLokasi"
+        min="0"
+        placeholder="Contoh: 800"
+      >
 
-      <button type="button" class="primary-button" onclick="simpanLokasiBaru()">
+      <button
+        type="button"
+        class="primary-button"
+        onclick="simpanLokasiBaru()"
+      >
         Simpan Lokasi
       </button>
 
-      <button type="button" class="secondary-button" onclick="openPopupDaftarLokasi()">
+      <button
+        type="button"
+        class="secondary-button"
+        onclick="openPopupDaftarLokasi()"
+      >
         Lihat Daftar Lokasi
       </button>
+
     </div>
   </div>
 
@@ -329,8 +434,14 @@
   <div id="popupDaftarLokasi" class="popup">
     <div class="popup-header">
       <h3>Daftar Lokasi Kerja</h3>
-      <button type="button" onclick="closePopupDaftarLokasi()">✕</button>
+      <button
+        type="button"
+        onclick="closePopupDaftarLokasi()"
+      >
+        ✕
+      </button>
     </div>
+
     <div id="isiDaftarLokasi" class="popup-content"></div>
   </div>
 
@@ -338,11 +449,17 @@
   <div id="popupRekap" class="popup">
     <div class="popup-header">
       <h3>📋 Rekap Bulanan</h3>
-      <button type="button" onclick="closePopupRekap()">✕</button>
+      <button
+        type="button"
+        onclick="closePopupRekap()"
+      >
+        ✕
+      </button>
     </div>
+
     <div id="isiRekap" class="popup-content"></div>
   </div>
 
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=17"></script>
 </body>
 </html>
