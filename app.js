@@ -1,7 +1,7 @@
 
 /* =========================================================
    GajiKu Jepang - APP.JS
-   Versi dengan fitur Pengeluaran
+   Versi lengkap dengan fitur Pengeluaran
    Kompatibel dengan backup lama:
    {
      db: [],
@@ -135,8 +135,6 @@ function normalizeDatabase(source) {
     };
   }
 
-  /* LOKASI */
-
   const lokasiSource = Array.isArray(source.lokasi)
     ? source.lokasi
     : [];
@@ -149,8 +147,6 @@ function normalizeDatabase(source) {
       ? l.jenis
       : 'kamar'
   }));
-
-  /* DATA KERJA */
 
   const dataSource = Array.isArray(source.data)
     ? source.data
@@ -165,10 +161,9 @@ function normalizeDatabase(source) {
     total: Number(d.total) || 0,
     jenis: ['kamar', 'jam', 'borongan'].includes(d.jenis)
       ? d.jenis
-      : 'kamar'
+      : 'kamar',
+    catatan: String(d.catatan || '')
   }));
-
-  /* PENGELUARAN */
 
   const pengeluaranSource = Array.isArray(source.pengeluaran)
     ? source.pengeluaran
@@ -185,15 +180,11 @@ function normalizeDatabase(source) {
     )
   })).filter(p => p.tanggal && p.jumlah > 0);
 
-  /* TARGET */
-
   let target = Number(source.target);
 
   if (!Number.isFinite(target) || target <= 0) {
     target = 250000;
   }
-
-  /* BAHASA */
 
   const bahasaAktif = ['id', 'en', 'jp'].includes(source.bahasa)
     ? source.bahasa
@@ -363,32 +354,72 @@ function closePopupStatistik() {
   document.getElementById('popupOverlay2').style.display = 'none';
 }
 
-function openPopupInputDariDetail() {
+/* =========================================================
+   INPUT DATA DARI DETAIL KALENDER
+   ========================================================= */
+
+function openPopupInputDariDetail(tgl = null) {
+  if (tgl) {
+    tanggalAktifPopup = tgl;
+  }
+
+  if (!tanggalAktifPopup) {
+    tanggalAktifPopup = tanggalHariIni();
+  }
+
   renderSelectInputLokasi();
 
-  document.getElementById('inputTanggal').value = tanggalAktifPopup;
+  const inputTanggal = document.getElementById('inputTanggal');
+  const inputTanggalText = document.getElementById('inputTanggalText');
+  const inputJumlah = document.getElementById('inputJumlah');
+  const inputGaji = document.getElementById('inputGaji');
+  const inputCatatan = document.getElementById('inputCatatan');
 
-  document.getElementById('inputTanggalText').innerText =
-    `Tanggal: ${tanggalAktifPopup}`;
+  if (inputTanggal) {
+    inputTanggal.value = tanggalAktifPopup;
+  }
 
-  document.getElementById('inputJumlah').value = '';
+  if (inputTanggalText) {
+    inputTanggalText.innerText = `Tanggal: ${tanggalAktifPopup}`;
+  }
+
+  if (inputJumlah) inputJumlah.value = '';
+  if (inputGaji) inputGaji.value = '';
+  if (inputCatatan) inputCatatan.value = '';
 
   document.getElementById('popupInput').style.display = 'block';
+  document.getElementById('popupOverlay2').style.display = 'block';
 }
 
 function closePopupInput() {
   document.getElementById('popupInput').style.display = 'none';
+
+  const detail = document.getElementById('popupDetail');
+
+  if (!detail || detail.style.display !== 'block') {
+    document.getElementById('popupOverlay2').style.display = 'none';
+  }
 }
 
 function closeSemuaPopup() {
-  closePopupLokasi();
-  closePopupDaftarLokasi();
-  closePopupRekap();
-  closePopupDetail();
-  closePopupEdit();
-  closePopupInput();
-  closePopupStatistik();
-  closePopupPengeluaran();
+  const popupIds = [
+    'popupLokasi',
+    'popupDaftarLokasi',
+    'popupRekap',
+    'popupDetail',
+    'popupEdit',
+    'popupInput',
+    'popupStatistik',
+    'popupPengeluaran'
+  ];
+
+  popupIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const overlay = document.getElementById('popupOverlay2');
+  if (overlay) overlay.style.display = 'none';
 }
 
 /* =========================================================
@@ -585,7 +616,7 @@ function renderKalender() {
 }
 
 /* =========================================================
-   DETAIL
+   DETAIL KERJA PER TANGGAL
    ========================================================= */
 
 function renderPopupDetail(tgl) {
@@ -601,59 +632,77 @@ function renderPopupDetail(tgl) {
 
   if (!isi) return;
 
-  if (dataHari.length === 0) {
-    isi.innerHTML =
-      '<p style="color:#9ca3af">Belum ada data kerja</p>';
-    return;
-  }
-
-  const totalHari = dataHari.reduce(
-    (a, b) => a + Number(b.total || 0),
-    0
-  );
-
   let html = `
-    <div class="stat-item">
-      <span>Total</span>
-      <b>¥${totalHari.toLocaleString()}</b>
-    </div>
+    <div class="popup-content">
+
+      <button
+        type="button"
+        class="primary-button"
+        onclick="openPopupInputDariDetail('${tgl}')">
+        ＋ Tambah Hasil Kerja
+      </button>
   `;
 
-  dataHari.forEach(d => {
+  if (dataHari.length === 0) {
+    html += `
+      <p style="color:#9ca3af;margin-top:15px">
+        Belum ada data kerja pada tanggal ini.
+      </p>
+    `;
+
+  } else {
+    const totalHari = dataHari.reduce(
+      (a, b) => a + Number(b.total || 0),
+      0
+    );
+
     html += `
       <div class="stat-item">
-        <span>
-          ${escapeHTML(d.lokasiNama)}
-          <br>
-          <small>${d.jumlah} ${d.jenis}</small>
-        </span>
-
-        <div>
-          <b>¥${Number(d.total).toLocaleString()}</b>
-          <br>
-
-          <button
-            onclick="openPopupEdit(${d.id})"
-            class="btn-kecil"
-            style="background:#3b82f6">
-            Edit
-          </button>
-
-          <button
-            onclick="hapusData(${d.id})"
-            class="btn-kecil btn-danger">
-            Hapus
-          </button>
-        </div>
+        <span>Total Gaji</span>
+        <b>¥${totalHari.toLocaleString()}</b>
       </div>
     `;
-  });
+
+    dataHari.forEach(d => {
+      html += `
+        <div class="stat-item">
+          <span>
+            ${escapeHTML(d.lokasiNama)}
+            <br>
+            <small>${d.jumlah} ${escapeHTML(d.jenis)}</small>
+          </span>
+
+          <div>
+            <b>¥${Number(d.total).toLocaleString()}</b>
+            <br>
+
+            <button
+              type="button"
+              onclick="openPopupEdit(${d.id})"
+              class="btn-kecil"
+              style="background:#3b82f6">
+              Edit
+            </button>
+
+            <button
+              type="button"
+              onclick="hapusData(${d.id})"
+              class="btn-kecil btn-danger">
+              Hapus
+            </button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  html += '</div>';
 
   isi.innerHTML = html;
 }
 
 /* =========================================================
-   INPUT DATA
+   INPUT DATA KERJA
    ========================================================= */
 
 function simpanDataDariPopup() {
@@ -664,6 +713,9 @@ function simpanDataDariPopup() {
   const jumlah = parseFloat(
     document.getElementById('inputJumlah').value
   );
+
+  const catatanEl = document.getElementById('inputCatatan');
+  const catatan = catatanEl ? catatanEl.value.trim() : '';
 
   const lokasi = db.lokasi.find(
     l => String(l.id) === String(lokasiIdRaw)
@@ -689,11 +741,15 @@ function simpanDataDariPopup() {
     lokasiNama: lokasi.nama,
     jumlah,
     total,
-    jenis: lokasi.jenis
+    jenis: lokasi.jenis,
+    catatan
   });
+
+  tanggalAktifPopup = tanggal;
 
   simpan();
   renderSemua();
+
   closePopupInput();
   renderPopupDetail(tanggal);
 
@@ -701,7 +757,7 @@ function simpanDataDariPopup() {
 }
 
 /* =========================================================
-   DELETE DATA
+   DELETE DATA KERJA
    ========================================================= */
 
 function hapusData(id) {
@@ -711,11 +767,14 @@ function hapusData(id) {
 
   simpan();
   renderSemua();
-  renderPopupDetail(tanggalAktifPopup);
+
+  if (tanggalAktifPopup) {
+    renderPopupDetail(tanggalAktifPopup);
+  }
 }
 
 /* =========================================================
-   EDIT DATA
+   EDIT DATA KERJA
    ========================================================= */
 
 function simpanEdit() {
@@ -755,10 +814,12 @@ function simpanEdit() {
     ? jumlah * Number(lokasi.tarif)
     : Number(lokasi.tarif);
 
+  tanggalAktifPopup = tanggal;
+
   simpan();
   renderSemua();
   closePopupEdit();
-  renderPopupDetail(data.tanggal);
+  renderPopupDetail(tanggal);
 }
 
 /* =========================================================
@@ -884,7 +945,11 @@ function renderPopupStatistik() {
     `;
   }
 
-  document.getElementById('isiStatistikPopup').innerHTML = html;
+  const isi = document.getElementById('isiStatistikPopup');
+
+  if (isi) {
+    isi.innerHTML = html;
+  }
 }
 
 /* =========================================================
@@ -913,8 +978,11 @@ function renderPopupRekap() {
     `;
   });
 
-  document.getElementById('isiRekap').innerHTML =
-    html || 'Belum ada data';
+  const isi = document.getElementById('isiRekap');
+
+  if (isi) {
+    isi.innerHTML = html || 'Belum ada data';
+  }
 }
 
 /* =========================================================
@@ -1340,11 +1408,10 @@ function convertBackupLama(oldBackup) {
       lokasiNama: lokasiData.nama,
       jumlah: Number(oldData.jumlah) || 0,
       total,
-      jenis: lokasiData.jenis
+      jenis: lokasiData.jenis,
+      catatan: String(oldData.catatan || '')
     });
   });
-
-  /* KONVERSI PENGELUARAN LAMA */
 
   const pengeluaranLama = Array.isArray(oldBackup.pengeluaranDb)
     ? oldBackup.pengeluaranDb
@@ -1505,6 +1572,10 @@ function hapusPengeluaran(id) {
   renderSemua();
 }
 
+/* =========================================================
+   RENDER RINGKASAN DAN DAFTAR PENGELUARAN
+   ========================================================= */
+
 function renderPengeluaran() {
   const bulanIni =
     `${bulanAktif.getFullYear()}-${String(
@@ -1581,6 +1652,31 @@ function renderPengeluaran() {
         </div>
       </div>
     `).join('');
+}
+
+/* =========================================================
+   TOGGLE RINCIAN PENGELUARAN
+   ========================================================= */
+
+function toggleRincianKeuangan() {
+  const rincian = document.getElementById('rincianKeuangan');
+  const tombol = document.getElementById('btnToggleRincianKeuangan');
+
+  if (!rincian || !tombol) {
+    console.warn('Elemen rincian pengeluaran tidak ditemukan.');
+    return;
+  }
+
+  const sedangTertutup =
+    window.getComputedStyle(rincian).display === 'none';
+
+  if (sedangTertutup) {
+    rincian.style.display = 'block';
+    tombol.innerText = 'Tutup rincian pengeluaran ▲';
+  } else {
+    rincian.style.display = 'none';
+    tombol.innerText = 'Lihat rincian pengeluaran ▼';
+  }
 }
 
 /* =========================================================
