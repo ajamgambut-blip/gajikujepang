@@ -1,6 +1,8 @@
+
 /* =========================================================
    GajiKu Jepang - APP.JS
-   Compatible dengan backup lama:
+   Versi dengan fitur Pengeluaran
+   Kompatibel dengan backup lama:
    {
      db: [],
      lokasiDb: [],
@@ -12,6 +14,7 @@
 let db = {
   data: [],
   lokasi: [],
+  pengeluaran: [],
   target: 250000,
   bahasa: 'id'
 };
@@ -19,7 +22,6 @@ let db = {
 let bulanAktif = new Date();
 let idEdit = null;
 let tanggalAktifPopup = null;
-
 
 /* =========================================================
    BAHASA
@@ -75,13 +77,11 @@ const bahasa = {
   }
 };
 
-
 /* =========================================================
    START APP
    ========================================================= */
 
 window.onload = function () {
-
   loadDatabase();
 
   const select = document.getElementById('pilihBahasa');
@@ -94,555 +94,293 @@ window.onload = function () {
   renderSemua();
 };
 
-
 /* =========================================================
    LOAD DATABASE
    ========================================================= */
 
 function loadDatabase() {
-
   try {
+    const saved = localStorage.getItem('gajikuDB');
 
-    const saved =
-      localStorage.getItem('gajikuDB');
+    if (!saved) return;
 
-    if (!saved) {
-      return;
-    }
-
-    const parsed =
-      JSON.parse(saved);
-
-    db =
-      normalizeDatabase(parsed);
+    const parsed = JSON.parse(saved);
+    db = normalizeDatabase(parsed);
 
   } catch (error) {
-
-    console.error(
-      'Database error:',
-      error
-    );
+    console.error('Database error:', error);
 
     db = {
       data: [],
       lokasi: [],
+      pengeluaran: [],
       target: 250000,
       bahasa: 'id'
     };
   }
 }
 
-
 /* =========================================================
-   NORMALIZE DATABASE BARU
+   NORMALIZE DATABASE
    ========================================================= */
 
 function normalizeDatabase(source) {
-
   if (!source || typeof source !== 'object') {
-
     return {
       data: [],
       lokasi: [],
+      pengeluaran: [],
       target: 250000,
       bahasa: 'id'
     };
   }
 
+  /* LOKASI */
 
-  /* -----------------------------------------
-     LOKASI
-     ----------------------------------------- */
+  const lokasiSource = Array.isArray(source.lokasi)
+    ? source.lokasi
+    : [];
 
-  const lokasiSource =
-    Array.isArray(source.lokasi)
-      ? source.lokasi
-      : [];
+  const lokasi = lokasiSource.map((l, index) => ({
+    id: Number(l.id) || Date.now() + index,
+    nama: String(l.nama || ''),
+    tarif: Number(l.tarif) || 0,
+    jenis: ['kamar', 'jam', 'borongan'].includes(l.jenis)
+      ? l.jenis
+      : 'kamar'
+  }));
 
+  /* DATA KERJA */
 
-  const lokasi =
-    lokasiSource.map(
-      (l, index) => {
+  const dataSource = Array.isArray(source.data)
+    ? source.data
+    : [];
 
-        return {
+  const data = dataSource.map((d, index) => ({
+    id: Number(d.id) || Date.now() + index,
+    tanggal: String(d.tanggal || ''),
+    lokasiId: Number(d.lokasiId) || 0,
+    lokasiNama: String(d.lokasiNama || ''),
+    jumlah: Number(d.jumlah) || 0,
+    total: Number(d.total) || 0,
+    jenis: ['kamar', 'jam', 'borongan'].includes(d.jenis)
+      ? d.jenis
+      : 'kamar'
+  }));
 
-          id:
-            Number(l.id) ||
-            Date.now() +
-            index,
+  /* PENGELUARAN */
 
-          nama:
-            String(
-              l.nama || ''
-            ),
+  const pengeluaranSource = Array.isArray(source.pengeluaran)
+    ? source.pengeluaran
+    : [];
 
-          tarif:
-            Number(l.tarif) || 0,
+  const pengeluaran = pengeluaranSource.map((p, index) => ({
+    id: Number(p.id) || Date.now() + 10000 + index,
+    tanggal: String(p.tanggal || ''),
+    jumlah: Number(
+      p.jumlah ?? p.total ?? p.pengeluaran ?? p.nominal
+    ) || 0,
+    keterangan: String(
+      p.keterangan || p.nama || p.catatan || p.deskripsi || 'Pengeluaran'
+    )
+  })).filter(p => p.tanggal && p.jumlah > 0);
 
-          jenis:
-            ['kamar', 'jam', 'borongan']
-              .includes(l.jenis)
-              ? l.jenis
-              : 'kamar'
+  /* TARGET */
 
-        };
+  let target = Number(source.target);
 
-      }
-    );
-
-
-  /* -----------------------------------------
-     DATA
-     ----------------------------------------- */
-
-  const dataSource =
-    Array.isArray(source.data)
-      ? source.data
-      : [];
-
-
-  const data =
-    dataSource.map(
-      (d, index) => {
-
-        return {
-
-          id:
-            Number(d.id) ||
-            Date.now() +
-            index,
-
-          tanggal:
-            String(
-              d.tanggal || ''
-            ),
-
-          lokasiId:
-            Number(d.lokasiId) || 0,
-
-          lokasiNama:
-            String(
-              d.lokasiNama || ''
-            ),
-
-          jumlah:
-            Number(d.jumlah) || 0,
-
-          total:
-            Number(d.total) || 0,
-
-          jenis:
-            ['kamar', 'jam', 'borongan']
-              .includes(d.jenis)
-              ? d.jenis
-              : 'kamar'
-
-        };
-
-      }
-    );
-
-
-  /* -----------------------------------------
-     TARGET
-     ----------------------------------------- */
-
-  let target =
-    Number(source.target);
-
-
-  if (
-    !Number.isFinite(target) ||
-    target <= 0
-  ) {
-
+  if (!Number.isFinite(target) || target <= 0) {
     target = 250000;
-
   }
 
+  /* BAHASA */
 
-  /* -----------------------------------------
-     BAHASA
-     ----------------------------------------- */
-
-  const bahasaAktif =
-    ['id', 'en', 'jp']
-      .includes(source.bahasa)
-      ? source.bahasa
-      : 'id';
-
+  const bahasaAktif = ['id', 'en', 'jp'].includes(source.bahasa)
+    ? source.bahasa
+    : 'id';
 
   return {
-
     data,
     lokasi,
+    pengeluaran,
     target,
     bahasa: bahasaAktif
-
   };
 }
-
 
 /* =========================================================
    SAVE
    ========================================================= */
 
 function simpan() {
-
   try {
-
-    localStorage.setItem(
-      'gajikuDB',
-      JSON.stringify(db)
-    );
-
+    localStorage.setItem('gajikuDB', JSON.stringify(db));
   } catch (error) {
-
-    console.error(
-      'Gagal menyimpan:',
-      error
-    );
-
-    alert(
-      'Gagal menyimpan data.'
-    );
+    console.error('Gagal menyimpan:', error);
+    alert('Gagal menyimpan data.');
   }
 }
-
 
 /* =========================================================
    BAHASA
    ========================================================= */
 
 function gantiBahasa() {
-
-  const select =
-    document.getElementById(
-      'pilihBahasa'
-    );
+  const select = document.getElementById('pilihBahasa');
 
   if (!select) return;
 
-  db.bahasa =
-    select.value;
+  db.bahasa = select.value;
 
   updateBahasaUI();
-
   simpan();
-
   renderSemua();
 }
 
-
 function updateBahasaUI() {
-
-  const b =
-    bahasa[db.bahasa] ||
-    bahasa.id;
-
+  const b = bahasa[db.bahasa] || bahasa.id;
 
   const mapping = {
-
     subJudul: b.judul,
-
-    judulStatistik:
-      b.statistik,
-
-    judulRekap:
-      b.rekap,
-
-    judulDaftarLokasi:
-      b.daftar,
-
-    judulTambahLokasi:
-      b.tambah,
-
-    judulTarget:
-      b.target,
-
-    judulKalender:
-      b.kalender,
-
-    judulBackup:
-      b.backup
-
+    judulStatistik: b.statistik,
+    judulRekap: b.rekap,
+    judulDaftarLokasi: b.daftar,
+    judulTambahLokasi: b.tambah,
+    judulTarget: b.target,
+    judulKalender: b.kalender,
+    judulBackup: b.backup
   };
 
+  Object.keys(mapping).forEach(id => {
+    const el = document.getElementById(id);
 
-  Object.keys(mapping)
-    .forEach(id => {
-
-      const el =
-        document.getElementById(id);
-
-      if (el) {
-        el.innerText =
-          mapping[id];
-      }
-
-    });
+    if (el) {
+      el.innerText = mapping[id];
+    }
+  });
 }
-
 
 /* =========================================================
    BULAN
    ========================================================= */
 
 function gantiBulanHeader(dir) {
-
-  bulanAktif.setMonth(
-    bulanAktif.getMonth() + dir
-  );
-
+  bulanAktif.setMonth(bulanAktif.getMonth() + dir);
   renderSemua();
 }
-
 
 function gantiBulan(dir) {
-
-  bulanAktif.setMonth(
-    bulanAktif.getMonth() + dir
-  );
-
+  bulanAktif.setMonth(bulanAktif.getMonth() + dir);
   renderSemua();
 }
-
 
 /* =========================================================
    POPUP
    ========================================================= */
 
 function openPopupLokasi() {
-
-  document.getElementById(
-    'popupLokasi'
-  ).style.display = 'block';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'block';
+  document.getElementById('popupLokasi').style.display = 'block';
+  document.getElementById('popupOverlay2').style.display = 'block';
 }
-
 
 function closePopupLokasi() {
-
-  document.getElementById(
-    'popupLokasi'
-  ).style.display = 'none';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'none';
+  document.getElementById('popupLokasi').style.display = 'none';
+  document.getElementById('popupOverlay2').style.display = 'none';
 }
-
 
 function openPopupDaftarLokasi() {
-
   renderDaftarLokasiPopup();
 
-  document.getElementById(
-    'popupDaftarLokasi'
-  ).style.display = 'block';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'block';
+  document.getElementById('popupDaftarLokasi').style.display = 'block';
+  document.getElementById('popupOverlay2').style.display = 'block';
 }
-
 
 function closePopupDaftarLokasi() {
-
-  document.getElementById(
-    'popupDaftarLokasi'
-  ).style.display = 'none';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'none';
+  document.getElementById('popupDaftarLokasi').style.display = 'none';
+  document.getElementById('popupOverlay2').style.display = 'none';
 }
-
 
 function openPopupRekap() {
-
   renderPopupRekap();
 
-  document.getElementById(
-    'popupRekap'
-  ).style.display = 'block';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'block';
+  document.getElementById('popupRekap').style.display = 'block';
+  document.getElementById('popupOverlay2').style.display = 'block';
 }
-
 
 function closePopupRekap() {
-
-  document.getElementById(
-    'popupRekap'
-  ).style.display = 'none';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'none';
+  document.getElementById('popupRekap').style.display = 'none';
+  document.getElementById('popupOverlay2').style.display = 'none';
 }
-
 
 function openPopupDetail(tgl) {
-
-  tanggalAktifPopup =
-    tgl;
-
+  tanggalAktifPopup = tgl;
   renderPopupDetail(tgl);
 
-  document.getElementById(
-    'popupDetail'
-  ).style.display = 'block';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'block';
+  document.getElementById('popupDetail').style.display = 'block';
+  document.getElementById('popupOverlay2').style.display = 'block';
 }
-
 
 function closePopupDetail() {
-
-  document.getElementById(
-    'popupDetail'
-  ).style.display = 'none';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'none';
+  document.getElementById('popupDetail').style.display = 'none';
+  document.getElementById('popupOverlay2').style.display = 'none';
 }
 
-
 function openPopupEdit(id) {
-
   idEdit = id;
 
-  const data =
-    db.data.find(
-      d => d.id == id
-    );
-
+  const data = db.data.find(d => d.id == id);
 
   if (!data) {
-
-    alert(
-      'Data tidak ditemukan.'
-    );
-
+    alert('Data tidak ditemukan.');
     return;
   }
 
-
-  document.getElementById(
-    'editTanggal'
-  ).value =
-    data.tanggal;
-
+  document.getElementById('editTanggal').value = data.tanggal;
 
   renderSelectEditLokasi();
 
+  document.getElementById('editLokasi').value = data.lokasiId;
+  document.getElementById('editJumlah').value = data.jumlah;
 
-  document.getElementById(
-    'editLokasi'
-  ).value =
-    data.lokasiId;
-
-
-  document.getElementById(
-    'editJumlah'
-  ).value =
-    data.jumlah;
-
-
-  document.getElementById(
-    'popupEdit'
-  ).style.display = 'block';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'block';
+  document.getElementById('popupEdit').style.display = 'block';
+  document.getElementById('popupOverlay2').style.display = 'block';
 }
-
 
 function closePopupEdit() {
-
-  document.getElementById(
-    'popupEdit'
-  ).style.display = 'none';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'none';
+  document.getElementById('popupEdit').style.display = 'none';
+  document.getElementById('popupOverlay2').style.display = 'none';
 }
-
 
 function openPopupStatistik() {
-
   renderPopupStatistik();
 
-  document.getElementById(
-    'popupStatistik'
-  ).style.display = 'block';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'block';
+  document.getElementById('popupStatistik').style.display = 'block';
+  document.getElementById('popupOverlay2').style.display = 'block';
 }
-
 
 function closePopupStatistik() {
-
-  document.getElementById(
-    'popupStatistik'
-  ).style.display = 'none';
-
-  document.getElementById(
-    'popupOverlay2'
-  ).style.display = 'none';
+  document.getElementById('popupStatistik').style.display = 'none';
+  document.getElementById('popupOverlay2').style.display = 'none';
 }
-
 
 function openPopupInputDariDetail() {
-
   renderSelectInputLokasi();
 
-  document.getElementById(
-    'inputTanggal'
-  ).value =
-    tanggalAktifPopup;
+  document.getElementById('inputTanggal').value = tanggalAktifPopup;
 
-
-  document.getElementById(
-    'inputTanggalText'
-  ).innerText =
+  document.getElementById('inputTanggalText').innerText =
     `Tanggal: ${tanggalAktifPopup}`;
 
+  document.getElementById('inputJumlah').value = '';
 
-  document.getElementById(
-    'inputJumlah'
-  ).value = '';
-
-
-  document.getElementById(
-    'popupInput'
-  ).style.display = 'block';
+  document.getElementById('popupInput').style.display = 'block';
 }
-
 
 function closePopupInput() {
-
-  document.getElementById(
-    'popupInput'
-  ).style.display = 'none';
+  document.getElementById('popupInput').style.display = 'none';
 }
 
-
 function closeSemuaPopup() {
-
   closePopupLokasi();
   closePopupDaftarLokasi();
   closePopupRekap();
@@ -650,515 +388,248 @@ function closeSemuaPopup() {
   closePopupEdit();
   closePopupInput();
   closePopupStatistik();
-
+  closePopupPengeluaran();
 }
-
 
 /* =========================================================
    LOKASI
    ========================================================= */
 
 function simpanLokasiBaru() {
+  const nama = document.getElementById('namaLokasi').value.trim();
 
-  const nama =
-    document.getElementById(
-      'namaLokasi'
-    ).value.trim();
+  const tarif = parseFloat(
+    document.getElementById('tarifLokasi').value
+  );
 
+  const jenis = document.getElementById('jenisLokasi').value;
 
-  const tarif =
-    parseFloat(
-      document.getElementById(
-        'tarifLokasi'
-      ).value
-    );
-
-
-  const jenis =
-    document.getElementById(
-      'jenisLokasi'
-    ).value;
-
-
-  if (
-    !nama ||
-    !Number.isFinite(tarif) ||
-    tarif <= 0
-  ) {
-
-    alert(
-      'Isi nama dan tarif dengan benar.'
-    );
-
+  if (!nama || !Number.isFinite(tarif) || tarif <= 0) {
+    alert('Isi nama dan tarif dengan benar.');
     return;
   }
 
-
   db.lokasi.push({
-
     id: Date.now(),
-
     nama,
-
     tarif,
-
     jenis
-
   });
-
 
   simpan();
 
   renderSelectInputLokasi();
-
   renderSelectEditLokasi();
-
   renderDaftarLokasiPopup();
 
-
-  document.getElementById(
-    'namaLokasi'
-  ).value = '';
-
-
-  document.getElementById(
-    'tarifLokasi'
-  ).value = '';
-
+  document.getElementById('namaLokasi').value = '';
+  document.getElementById('tarifLokasi').value = '';
 
   closePopupLokasi();
 }
 
-
 function renderSelectInputLokasi() {
-
-  const sel =
-    document.getElementById(
-      'inputLokasi'
-    );
+  const sel = document.getElementById('inputLokasi');
 
   if (!sel) return;
-
 
   sel.innerHTML =
     '<option value="">Pilih Lokasi</option>' +
-
-    db.lokasi
-      .map(l => `
-
-        <option value="${l.id}">
-          ${escapeHTML(l.nama)}
-        </option>
-
-      `)
-      .join('');
+    db.lokasi.map(l => `
+      <option value="${l.id}">
+        ${escapeHTML(l.nama)}
+      </option>
+    `).join('');
 }
 
-
 function renderSelectEditLokasi() {
-
-  const sel =
-    document.getElementById(
-      'editLokasi'
-    );
+  const sel = document.getElementById('editLokasi');
 
   if (!sel) return;
 
-
-  sel.innerHTML =
-    db.lokasi
-      .map(l => `
-
-        <option value="${l.id}">
-          ${escapeHTML(l.nama)}
-        </option>
-
-      `)
-      .join('');
+  sel.innerHTML = db.lokasi.map(l => `
+    <option value="${l.id}">
+      ${escapeHTML(l.nama)}
+    </option>
+  `).join('');
 }
 
-
 function renderDaftarLokasiPopup() {
-
-  const div =
-    document.getElementById(
-      'isiDaftarLokasi'
-    );
+  const div = document.getElementById('isiDaftarLokasi');
 
   if (!div) return;
 
-
-  if (
-    db.lokasi.length === 0
-  ) {
-
-    div.innerHTML =
-      '<p>Belum ada lokasi</p>';
-
+  if (db.lokasi.length === 0) {
+    div.innerHTML = '<p>Belum ada lokasi</p>';
     return;
   }
 
+  div.innerHTML = db.lokasi.map(l => `
+    <div class="stat-item">
+      <div>
+        <b>${escapeHTML(l.nama)}</b>
+        <br>
+        <small>
+          ¥${Number(l.tarif).toLocaleString()}/${l.jenis}
+        </small>
+      </div>
 
-  div.innerHTML =
-    db.lokasi
-      .map(l => `
-
-        <div class="stat-item">
-
-          <div>
-
-            <b>
-              ${escapeHTML(l.nama)}
-            </b>
-
-            <br>
-
-            <small>
-              ¥${Number(l.tarif).toLocaleString()}
-              /${l.jenis}
-            </small>
-
-          </div>
-
-          <button
-            onclick="hapusLokasi(${l.id})"
-            class="btn-danger btn-kecil">
-            Hapus
-          </button>
-
-        </div>
-
-      `)
-      .join('');
+      <button
+        onclick="hapusLokasi(${l.id})"
+        class="btn-danger btn-kecil">
+        Hapus
+      </button>
+    </div>
+  `).join('');
 }
 
-
 function hapusLokasi(id) {
+  if (!confirm('Yakin hapus lokasi ini?')) return;
 
-  if (
-    !confirm(
-      'Yakin hapus lokasi ini?'
-    )
-  ) {
-    return;
-  }
-
-
-  db.lokasi =
-    db.lokasi.filter(
-      l => l.id != id
-    );
-
+  db.lokasi = db.lokasi.filter(l => l.id != id);
 
   simpan();
 
   renderSelectInputLokasi();
-
   renderSelectEditLokasi();
-
   renderDaftarLokasiPopup();
 }
-
 
 /* =========================================================
    KALENDER
    ========================================================= */
 
 function renderKalender() {
-
-  const grid =
-    document.getElementById(
-      'kalender'
-    );
+  const grid = document.getElementById('kalender');
 
   if (!grid) return;
 
-
   grid.innerHTML = '';
 
+  const y = bulanAktif.getFullYear();
+  const m = bulanAktif.getMonth();
 
-  const y =
-    bulanAktif.getFullYear();
+  const locale = db.bahasa === 'jp'
+    ? 'ja-JP'
+    : db.bahasa === 'en'
+      ? 'en-US'
+      : 'id-ID';
 
-  const m =
-    bulanAktif.getMonth();
-
-
-  const locale =
-    db.bahasa === 'jp'
-      ? 'ja-JP'
-      : db.bahasa === 'en'
-        ? 'en-US'
-        : 'id-ID';
-
-
-  const bulanTahun =
-    document.getElementById(
-      'bulanTahun'
-    );
-
+  const bulanTahun = document.getElementById('bulanTahun');
 
   if (bulanTahun) {
-
-    bulanTahun.innerText =
-      bulanAktif.toLocaleString(
-        locale,
-        {
-          month: 'long',
-          year: 'numeric'
-        }
-      );
+    bulanTahun.innerText = bulanAktif.toLocaleString(locale, {
+      month: 'long',
+      year: 'numeric'
+    });
   }
 
-
-  const judulHeader =
-    document.getElementById(
-      'judulHeaderBulan'
-    );
-
+  const judulHeader = document.getElementById('judulHeaderBulan');
 
   if (judulHeader) {
-
     judulHeader.innerText =
       `${bahasa[db.bahasa].pendapatan} ${
-        bulanAktif.toLocaleString(
-          locale,
-          {
-            month: 'long',
-            year: 'numeric'
-          }
-        )
+        bulanAktif.toLocaleString(locale, {
+          month: 'long',
+          year: 'numeric'
+        })
       }`;
   }
 
+  const jmlHari = new Date(y, m + 1, 0).getDate();
+  const mulai = new Date(y, m, 1).getDay();
 
-  const jmlHari =
-    new Date(
-      y,
-      m + 1,
-      0
-    ).getDate();
-
-
-  const mulai =
-    new Date(
-      y,
-      m,
-      1
-    ).getDay();
-
-
-  const hari =
-    db.bahasa === 'id'
-      ? [
-          'Min',
-          'Sen',
-          'Sel',
-          'Rab',
-          'Kam',
-          'Jum',
-          'Sab'
-        ]
-      : db.bahasa === 'en'
-        ? [
-            'Sun',
-            'Mon',
-            'Tue',
-            'Wed',
-            'Thu',
-            'Fri',
-            'Sat'
-          ]
-        : [
-            '日',
-            '月',
-            '火',
-            '水',
-            '木',
-            '金',
-            '土'
-          ];
-
+  const hari = db.bahasa === 'id'
+    ? ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
+    : db.bahasa === 'en'
+      ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      : ['日', '月', '火', '水', '木', '金', '土'];
 
   hari.forEach(h => {
-
     grid.innerHTML += `
-
-      <div
-        style="
-          font-size:11px;
-          color:#9ca3af;
-          font-weight:bold;
-          text-align:center
-        ">
-        ${h}
-      </div>
-
+      <div style="
+        font-size:11px;
+        color:#9ca3af;
+        font-weight:bold;
+        text-align:center
+      ">${h}</div>
     `;
-
   });
 
-
-  for (
-    let i = 0;
-    i < mulai;
-    i++
-  ) {
-
-    grid.innerHTML +=
-      `<div class="tanggal-kosong"></div>`;
-
+  for (let i = 0; i < mulai; i++) {
+    grid.innerHTML += '<div class="tanggal-kosong"></div>';
   }
 
-
-  for (
-    let t = 1;
-    t <= jmlHari;
-    t++
-  ) {
-
+  for (let t = 1; t <= jmlHari; t++) {
     const key =
       `${y}-${String(m + 1).padStart(2, '0')}-${String(t).padStart(2, '0')}`;
 
+    const dataHari = db.data.filter(d => d.tanggal === key);
 
-    const dataHari =
-      db.data.filter(
-        d => d.tanggal === key
-      );
+    const total = dataHari.reduce(
+      (a, b) => a + Number(b.total || 0),
+      0
+    );
 
-
-    const total =
-      dataHari.reduce(
-        (a, b) =>
-          a + Number(b.total || 0),
-        0
-      );
-
-
-    const adaKerja =
-      total > 0
-        ? 'ada-kerja'
-        : '';
-
+    const adaKerja = total > 0 ? 'ada-kerja' : '';
 
     grid.innerHTML += `
-
       <div
         class="kalender-item ${adaKerja}"
         onclick="openPopupDetail('${key}')">
-
         <b>${t}</b>
-
-        <small>
-          ${
-            total
-              ? '¥' +
-                total.toLocaleString()
-              : '-'
-          }
-        </small>
-
+        <small>${total ? '¥' + total.toLocaleString() : '-'}</small>
       </div>
-
     `;
-
   }
 }
-
 
 /* =========================================================
    DETAIL
    ========================================================= */
 
 function renderPopupDetail(tgl) {
+  const dataHari = db.data.filter(d => d.tanggal === tgl);
 
-  const dataHari =
-    db.data.filter(
-      d => d.tanggal === tgl
-    );
-
-
-  const judul =
-    document.getElementById(
-      'judulDetail'
-    );
-
+  const judul = document.getElementById('judulDetail');
 
   if (judul) {
-
-    judul.innerText =
-      `Detail ${tgl}`;
-
+    judul.innerText = `Detail ${tgl}`;
   }
 
-
-  const isi =
-    document.getElementById(
-      'isiDetail'
-    );
-
+  const isi = document.getElementById('isiDetail');
 
   if (!isi) return;
 
-
-  if (
-    dataHari.length === 0
-  ) {
-
+  if (dataHari.length === 0) {
     isi.innerHTML =
       '<p style="color:#9ca3af">Belum ada data kerja</p>';
-
     return;
   }
 
-
-  const totalHari =
-    dataHari.reduce(
-      (a, b) =>
-        a + Number(b.total || 0),
-      0
-    );
-
+  const totalHari = dataHari.reduce(
+    (a, b) => a + Number(b.total || 0),
+    0
+  );
 
   let html = `
-
     <div class="stat-item">
-
       <span>Total</span>
-
-      <b>
-        ¥${totalHari.toLocaleString()}
-      </b>
-
+      <b>¥${totalHari.toLocaleString()}</b>
     </div>
-
   `;
 
-
   dataHari.forEach(d => {
-
     html += `
-
       <div class="stat-item">
-
         <span>
-
           ${escapeHTML(d.lokasiNama)}
-
           <br>
-
-          <small>
-            ${d.jumlah} ${d.jenis}
-          </small>
-
+          <small>${d.jumlah} ${d.jenis}</small>
         </span>
 
         <div>
-
-          <b>
-            ¥${Number(d.total).toLocaleString()}
-          </b>
-
+          <b>¥${Number(d.total).toLocaleString()}</b>
           <br>
 
           <button
@@ -1173,266 +644,126 @@ function renderPopupDetail(tgl) {
             class="btn-kecil btn-danger">
             Hapus
           </button>
-
         </div>
-
       </div>
-
     `;
-
   });
 
-
-  isi.innerHTML =
-    html;
+  isi.innerHTML = html;
 }
-
 
 /* =========================================================
    INPUT DATA
    ========================================================= */
 
 function simpanDataDariPopup() {
+  const tanggal = document.getElementById('inputTanggal').value;
 
-  const tanggal =
-    document.getElementById(
-      'inputTanggal'
-    ).value;
+  const lokasiIdRaw = document.getElementById('inputLokasi').value;
 
+  const jumlah = parseFloat(
+    document.getElementById('inputJumlah').value
+  );
 
-  const lokasiIdRaw =
-    document.getElementById(
-      'inputLokasi'
-    ).value;
+  const lokasi = db.lokasi.find(
+    l => String(l.id) === String(lokasiIdRaw)
+  );
 
-
-  const jumlah =
-    parseFloat(
-      document.getElementById(
-        'inputJumlah'
-      ).value
-    );
-
-
-  const lokasi =
-    db.lokasi.find(
-      l =>
-        String(l.id) ===
-        String(lokasiIdRaw)
-    );
-
-
-  if (
-    !tanggal ||
-    !lokasi ||
-    !Number.isFinite(jumlah) ||
-    jumlah <= 0
-  ) {
-
-    alert(
-      'Isi semua data dengan benar.'
-    );
-
+  if (!tanggal || !lokasi || !Number.isFinite(jumlah) || jumlah <= 0) {
+    alert('Isi semua data dengan benar.');
     return;
   }
 
-
   let total;
 
-
-  if (
-    lokasi.jenis === 'kamar' ||
-    lokasi.jenis === 'jam'
-  ) {
-
-    total =
-      jumlah *
-      Number(lokasi.tarif);
-
+  if (lokasi.jenis === 'kamar' || lokasi.jenis === 'jam') {
+    total = jumlah * Number(lokasi.tarif);
   } else {
-
-    total =
-      Number(lokasi.tarif);
-
+    total = Number(lokasi.tarif);
   }
 
-
   db.data.push({
-
     id: Date.now(),
-
     tanggal,
-
-    lokasiId:
-      Number(lokasi.id),
-
-    lokasiNama:
-      lokasi.nama,
-
+    lokasiId: Number(lokasi.id),
+    lokasiNama: lokasi.nama,
     jumlah,
-
     total,
-
-    jenis:
-      lokasi.jenis
-
+    jenis: lokasi.jenis
   });
 
-
   simpan();
-
   renderSemua();
-
   closePopupInput();
+  renderPopupDetail(tanggal);
 
-  renderPopupDetail(
-    tanggal
-  );
-
-  alert(
-    'Tersimpan!'
-  );
+  alert('Tersimpan!');
 }
-
 
 /* =========================================================
    DELETE DATA
    ========================================================= */
 
 function hapusData(id) {
+  if (!confirm('Yakin hapus data ini?')) return;
 
-  if (
-    !confirm(
-      'Yakin hapus data ini?'
-    )
-  ) {
-    return;
-  }
-
-
-  db.data =
-    db.data.filter(
-      d => d.id != id
-    );
-
+  db.data = db.data.filter(d => d.id != id);
 
   simpan();
-
   renderSemua();
-
-  renderPopupDetail(
-    tanggalAktifPopup
-  );
+  renderPopupDetail(tanggalAktifPopup);
 }
-
 
 /* =========================================================
    EDIT DATA
    ========================================================= */
 
 function simpanEdit() {
-
-  const data =
-    db.data.find(
-      d => d.id == idEdit
-    );
-
+  const data = db.data.find(d => d.id == idEdit);
 
   if (!data) {
-
-    alert(
-      'Data tidak ditemukan.'
-    );
-
+    alert('Data tidak ditemukan.');
     return;
   }
 
+  const tanggal = document.getElementById('editTanggal').value;
+  const lokasiId = document.getElementById('editLokasi').value;
 
-  const tanggal =
-    document.getElementById(
-      'editTanggal'
-    ).value;
+  const jumlah = parseFloat(
+    document.getElementById('editJumlah').value
+  );
 
+  const lokasi = db.lokasi.find(
+    l => String(l.id) === String(lokasiId)
+  );
 
-  const lokasiId =
-    document.getElementById(
-      'editLokasi'
-    ).value;
-
-
-  const jumlah =
-    parseFloat(
-      document.getElementById(
-        'editJumlah'
-      ).value
-    );
-
-
-  const lokasi =
-    db.lokasi.find(
-      l =>
-        String(l.id) ===
-        String(lokasiId)
-    );
-
-
-  if (
-    !tanggal ||
-    !lokasi ||
-    !Number.isFinite(jumlah) ||
-    jumlah <= 0
-  ) {
-
-    alert(
-      'Isi semua data dengan benar.'
-    );
-
+  if (!tanggal || !lokasi || !Number.isFinite(jumlah) || jumlah <= 0) {
+    alert('Isi semua data dengan benar.');
     return;
   }
 
+  data.tanggal = tanggal;
+  data.lokasiId = Number(lokasi.id);
+  data.lokasiNama = lokasi.nama;
+  data.jumlah = jumlah;
+  data.jenis = lokasi.jenis;
 
-  data.tanggal =
-    tanggal;
-
-  data.lokasiId =
-    Number(lokasi.id);
-
-  data.lokasiNama =
-    lokasi.nama;
-
-  data.jumlah =
-    jumlah;
-
-  data.jenis =
-    lokasi.jenis;
-
-
-  data.total =
-    (
-      lokasi.jenis === 'kamar' ||
-      lokasi.jenis === 'jam'
-    )
-      ? jumlah *
-        Number(lokasi.tarif)
-      : Number(lokasi.tarif);
-
+  data.total = (
+    lokasi.jenis === 'kamar' ||
+    lokasi.jenis === 'jam'
+  )
+    ? jumlah * Number(lokasi.tarif)
+    : Number(lokasi.tarif);
 
   simpan();
-
   renderSemua();
-
   closePopupEdit();
-
-  renderPopupDetail(
-    data.tanggal
-  );
+  renderPopupDetail(data.tanggal);
 }
-
 
 /* =========================================================
    STATISTIK
    ========================================================= */
-
 
 function renderPopupStatistik() {
   const bulanIni =
@@ -1450,7 +781,6 @@ function renderPopupStatistik() {
     0
   ).getDate();
 
-  // Total tanggal kerja unik untuk semua lokasi
   const hariKerja = [
     ...new Set(
       dataBulanIni
@@ -1462,17 +792,16 @@ function renderPopupStatistik() {
   const hariLibur = jmlHari - hariKerja;
   const b = bahasa[db.bahasa] || bahasa.id;
 
-  const locale =
-    db.bahasa === 'jp'
-      ? 'ja-JP'
-      : db.bahasa === 'en'
-        ? 'en-US'
-        : 'id-ID';
+  const locale = db.bahasa === 'jp'
+    ? 'ja-JP'
+    : db.bahasa === 'en'
+      ? 'en-US'
+      : 'id-ID';
 
-  const namaBulan = bulanAktif.toLocaleString(
-    locale,
-    { month: 'long', year: 'numeric' }
-  );
+  const namaBulan = bulanAktif.toLocaleString(locale, {
+    month: 'long',
+    year: 'numeric'
+  });
 
   let html = `
     <div class="stat-item">
@@ -1502,7 +831,6 @@ function renderPopupStatistik() {
 
     if (dataLokasi.length === 0) return;
 
-    // Jumlah hari unik untuk lokasi ini
     const hariLokasi = [
       ...new Set(
         dataLokasi
@@ -1559,466 +887,225 @@ function renderPopupStatistik() {
   document.getElementById('isiStatistikPopup').innerHTML = html;
 }
 
-
-
 /* =========================================================
-   REKAP
+   REKAP BULANAN
    ========================================================= */
 
 function renderPopupRekap() {
-
-  const bulanUnik =
-    [
-      ...new Set(
-        db.data.map(
-          d =>
-            String(
-              d.tanggal
-            ).slice(0, 7)
-        )
-      )
-    ]
-    .filter(Boolean)
-    .sort()
-    .reverse();
-
+  const bulanUnik = [
+    ...new Set(
+      db.data.map(d => String(d.tanggal).slice(0, 7))
+    )
+  ].filter(Boolean).sort().reverse();
 
   let html = '';
 
-
   bulanUnik.forEach(bln => {
-
-    const total =
-      db.data
-        .filter(
-          d =>
-            d.tanggal.startsWith(
-              bln
-            )
-        )
-        .reduce(
-          (a, b) =>
-            a +
-            Number(
-              b.total || 0
-            ),
-          0
-        );
-
+    const total = db.data
+      .filter(d => d.tanggal.startsWith(bln))
+      .reduce((a, b) => a + Number(b.total || 0), 0);
 
     html += `
-
       <div class="stat-item">
-
-        <span>
-          ${bln}
-        </span>
-
-        <b>
-          ¥${total.toLocaleString()}
-        </b>
-
+        <span>${bln}</span>
+        <b>¥${total.toLocaleString()}</b>
       </div>
-
     `;
-
   });
 
-
-  document.getElementById(
-    'isiRekap'
-  ).innerHTML =
-    html ||
-    'Belum ada data';
+  document.getElementById('isiRekap').innerHTML =
+    html || 'Belum ada data';
 }
-
 
 /* =========================================================
    RENDER SEMUA
    ========================================================= */
 
 function renderSemua() {
-
   renderKalender();
-
   renderSelectInputLokasi();
-
   renderSelectEditLokasi();
 
-
   const bulanIni =
-    `${bulanAktif.getFullYear()}-${
-      String(
-        bulanAktif.getMonth() + 1
-      ).padStart(2, '0')
-    }`;
+    `${bulanAktif.getFullYear()}-${String(
+      bulanAktif.getMonth() + 1
+    ).padStart(2, '0')}`;
 
+  const dataBulanIni = db.data.filter(
+    x => x.tanggal.startsWith(bulanIni)
+  );
 
-  const dataBulanIni =
-    db.data.filter(
-      x =>
-        x.tanggal.startsWith(
-          bulanIni
-        )
-    );
+  const totalBulanIni = dataBulanIni.reduce(
+    (a, b) => a + Number(b.total || 0),
+    0
+  );
 
+  const totalSejakAwal = db.data.reduce(
+    (a, b) => a + Number(b.total || 0),
+    0
+  );
 
-  const totalBulanIni =
-    dataBulanIni.reduce(
-      (a, b) =>
-        a +
-        Number(
-          b.total || 0
-        ),
-      0
-    );
-
-
-  const totalSejakAwal =
-    db.data.reduce(
-      (a, b) =>
-        a +
-        Number(
-          b.total || 0
-        ),
-      0
-    );
-
-
-  const totalGaji =
-    document.getElementById(
-      'totalGaji'
-    );
-
+  const totalGaji = document.getElementById('totalGaji');
 
   if (totalGaji) {
-
-    totalGaji.innerText =
-      '¥' +
-      totalBulanIni.toLocaleString();
-
+    totalGaji.innerText = '¥' + totalBulanIni.toLocaleString();
   }
 
-
-  const targetText =
-    document.getElementById(
-      'targetText'
-    );
-
+  const targetText = document.getElementById('targetText');
 
   if (targetText) {
-
-    targetText.innerText =
-      `¥${Number(
-        db.target
-      ).toLocaleString()}`;
-
+    targetText.innerText = `¥${Number(db.target).toLocaleString()}`;
   }
 
+  const persen = db.target > 0
+    ? Math.min(100, totalBulanIni / db.target * 100)
+    : 0;
 
-  const persen =
-    db.target > 0
-      ? Math.min(
-          100,
-          totalBulanIni /
-          db.target *
-          100
-        )
-      : 0;
-
-
-  const progressBar =
-    document.getElementById(
-      'progressBar'
-    );
-
+  const progressBar = document.getElementById('progressBar');
 
   if (progressBar) {
-
-    progressBar.style.width =
-      persen + '%';
-
+    progressBar.style.width = persen + '%';
   }
 
-
-  const progressText =
-    document.getElementById(
-      'progressText'
-    );
-
+  const progressText = document.getElementById('progressText');
 
   if (progressText) {
-
-    progressText.innerText =
-      Math.round(persen) +
-      '%';
-
+    progressText.innerText = Math.round(persen) + '%';
   }
 
-
-  const totalAwal =
-    document.getElementById(
-      'totalSejakAwal'
-    );
-
+  const totalAwal = document.getElementById('totalSejakAwal');
 
   if (totalAwal) {
-
     totalAwal.innerHTML = `
-
       <div class="stat-item">
-
-        <span>
-          Total Sejak Awal
-        </span>
-
+        <span>Total Sejak Awal</span>
         <b style="color:#3b82f6">
           ¥${totalSejakAwal.toLocaleString()}
         </b>
-
       </div>
-
     `;
-
   }
-}
 
+  renderPengeluaran();
+}
 
 /* =========================================================
    TARGET
    ========================================================= */
 
 function ubahTarget() {
+  const t = prompt('Masukkan target baru:', db.target);
 
-  const t =
-    prompt(
-      'Masukkan target baru:',
-      db.target
-    );
+  if (t === null || t.trim() === '') return;
 
+  const nilai = parseFloat(t);
 
-  if (
-    t === null ||
-    t.trim() === ''
-  ) {
+  if (!Number.isFinite(nilai) || nilai <= 0) {
+    alert('Target tidak valid.');
     return;
   }
 
-
-  const nilai =
-    parseFloat(t);
-
-
-  if (
-    !Number.isFinite(nilai) ||
-    nilai <= 0
-  ) {
-
-    alert(
-      'Target tidak valid.'
-    );
-
-    return;
-  }
-
-
-  db.target =
-    nilai;
+  db.target = nilai;
 
   simpan();
-
   renderSemua();
 }
 
-
 /* =========================================================
    SHARE LAPORAN
-   Isi:
-   - Periode bulan
-   - Total pendapatan
-   - Total hari kerja
-   - Total hari libur
-   - Total kamar
-   - Rincian kamar per lokasi
-   - Total jam
    ========================================================= */
 
 function shareLaporan() {
-
-  const tahun =
-    bulanAktif.getFullYear();
-
-  const bulan =
-    bulanAktif.getMonth();
+  const tahun = bulanAktif.getFullYear();
+  const bulan = bulanAktif.getMonth();
 
   const bulanKey =
-    `${tahun}-${String(
-      bulan + 1
-    ).padStart(2, '0')}`;
+    `${tahun}-${String(bulan + 1).padStart(2, '0')}`;
 
+  const dataBulanIni = db.data.filter(
+    d => String(d.tanggal).startsWith(bulanKey)
+  );
 
-  /* -----------------------------------------
-     DATA BULAN AKTIF
-     ----------------------------------------- */
+  const pengeluaranBulanIni = db.pengeluaran.filter(
+    p => String(p.tanggal).startsWith(bulanKey)
+  );
 
-  const dataBulanIni =
-    db.data.filter(
-      d =>
-        String(d.tanggal)
-          .startsWith(bulanKey)
-    );
+  const totalPendapatan = dataBulanIni.reduce(
+    (total, d) => total + Number(d.total || 0),
+    0
+  );
 
+  const totalPengeluaran = pengeluaranBulanIni.reduce(
+    (total, p) => total + Number(p.jumlah || 0),
+    0
+  );
 
-  /* -----------------------------------------
-     TOTAL PENDAPATAN
-     ----------------------------------------- */
+  const gajiBersih = totalPendapatan - totalPengeluaran;
 
-  const totalPendapatan =
-    dataBulanIni.reduce(
-      (total, d) =>
-        total +
-        Number(d.total || 0),
-      0
-    );
+  const tanggalKerja = [
+    ...new Set(dataBulanIni.map(d => d.tanggal).filter(Boolean))
+  ];
 
+  const totalHariKerja = tanggalKerja.length;
 
-  /* -----------------------------------------
-     TOTAL HARI KERJA
-     ----------------------------------------- */
-
-  const tanggalKerja =
-    [
-      ...new Set(
-        dataBulanIni
-          .map(d => d.tanggal)
-          .filter(Boolean)
-      )
-    ];
-
-  const totalHariKerja =
-    tanggalKerja.length;
-
-
-  /* -----------------------------------------
-     TOTAL HARI LIBUR
-     ----------------------------------------- */
-
-  const jumlahHariDalamBulan =
-    new Date(
-      tahun,
-      bulan + 1,
-      0
-    ).getDate();
+  const jumlahHariDalamBulan = new Date(
+    tahun,
+    bulan + 1,
+    0
+  ).getDate();
 
   const totalHariLibur =
-    jumlahHariDalamBulan -
-    totalHariKerja;
+    jumlahHariDalamBulan - totalHariKerja;
 
+  const dataKamar = dataBulanIni.filter(
+    d => d.jenis === 'kamar'
+  );
 
-  /* -----------------------------------------
-     TOTAL KAMAR
-     ----------------------------------------- */
-
-  const dataKamar =
-    dataBulanIni.filter(
-      d =>
-        d.jenis === 'kamar'
-    );
-
-
-  const totalKamar =
-    dataKamar.reduce(
-      (total, d) =>
-        total +
-        Number(d.jumlah || 0),
-      0
-    );
-
-
-  /* -----------------------------------------
-     RINCIAN KAMAR PER LOKASI
-     ----------------------------------------- */
+  const totalKamar = dataKamar.reduce(
+    (total, d) => total + Number(d.jumlah || 0),
+    0
+  );
 
   const kamarPerLokasi = {};
 
-
   dataKamar.forEach(d => {
+    const nama = d.lokasiNama || 'Lokasi Tidak Diketahui';
 
-    const nama =
-      d.lokasiNama ||
-      'Lokasi Tidak Diketahui';
-
-
-    if (
-      !kamarPerLokasi[nama]
-    ) {
-
+    if (!kamarPerLokasi[nama]) {
       kamarPerLokasi[nama] = 0;
-
     }
 
-
-    kamarPerLokasi[nama] +=
-      Number(d.jumlah || 0);
-
+    kamarPerLokasi[nama] += Number(d.jumlah || 0);
   });
-
 
   let rincianKamar = '';
 
+  Object.keys(kamarPerLokasi).forEach(nama => {
+    rincianKamar +=
+      `   ${nama}: ${kamarPerLokasi[nama].toLocaleString()} kamar\n`;
+  });
 
-  Object.keys(kamarPerLokasi)
-    .forEach(nama => {
+  const totalJam = dataBulanIni
+    .filter(d => d.jenis === 'jam')
+    .reduce((total, d) => total + Number(d.jumlah || 0), 0);
 
-      rincianKamar +=
-        `   ${nama}: ${kamarPerLokasi[nama].toLocaleString()} kamar\n`;
+  let rincianPengeluaran = '';
 
-    });
+  pengeluaranBulanIni.forEach(p => {
+    rincianPengeluaran +=
+      `   ${p.tanggal} - ${p.keterangan}: ¥${Number(p.jumlah).toLocaleString()}\n`;
+  });
 
+  const locale = db.bahasa === 'jp'
+    ? 'ja-JP'
+    : db.bahasa === 'en'
+      ? 'en-US'
+      : 'id-ID';
 
-  /* -----------------------------------------
-     TOTAL JAM
-     ----------------------------------------- */
-
-  const totalJam =
-    dataBulanIni
-      .filter(
-        d =>
-          d.jenis === 'jam'
-      )
-      .reduce(
-        (total, d) =>
-          total +
-          Number(d.jumlah || 0),
-        0
-      );
-
-
-  /* -----------------------------------------
-     NAMA BULAN
-     ----------------------------------------- */
-
-  const locale =
-    db.bahasa === 'jp'
-      ? 'ja-JP'
-      : db.bahasa === 'en'
-        ? 'en-US'
-        : 'id-ID';
-
-
-  const namaBulan =
-    bulanAktif.toLocaleString(
-      locale,
-      {
-        month: 'long',
-        year: 'numeric'
-      }
-    );
-
-
-  /* -----------------------------------------
-     FORMAT LAPORAN
-     ----------------------------------------- */
+  const namaBulan = bulanAktif.toLocaleString(locale, {
+    month: 'long',
+    year: 'numeric'
+  });
 
   const teks =
 `📊 LAPORAN GAJIKU JEPANG
@@ -2027,6 +1114,14 @@ function shareLaporan() {
 
 💰 Total Pendapatan:
 ¥${totalPendapatan.toLocaleString()}
+
+💸 Total Pengeluaran:
+¥${totalPengeluaran.toLocaleString()}
+
+📋 Rincian Pengeluaran:
+${rincianPengeluaran || '   Tidak ada pengeluaran\n'}
+💵 GAJI BERSIH:
+¥${gajiBersih.toLocaleString()}
 
 📅 Total Hari Kerja:
 ${totalHariKerja} hari
@@ -2040,752 +1135,493 @@ ${rincianKamar}
 ⏱️ Total Jam:
 ${totalJam.toLocaleString()} jam`;
 
-
-  /* -----------------------------------------
-     SHARE
-     ----------------------------------------- */
-
-  if (
-    navigator.share
-  ) {
-
+  if (navigator.share) {
     navigator.share({
-
-      title:
-        `Laporan GajiKu - ${namaBulan}`,
-
-      text:
-        teks
-
-    }).catch(
-      () => {}
-    );
-
+      title: `Laporan GajiKu - ${namaBulan}`,
+      text: teks
+    }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(teks)
+      .then(() => alert('✅ Laporan berhasil disalin!'))
+      .catch(() => alert(teks));
   } else {
-
-    if (
-      navigator.clipboard
-    ) {
-
-      navigator.clipboard
-        .writeText(teks)
-        .then(
-          () => {
-
-            alert(
-              '✅ Laporan berhasil disalin!'
-            );
-
-          }
-        )
-        .catch(
-          () => {
-
-            alert(teks);
-
-          }
-        );
-
-    } else {
-
-      alert(teks);
-
-    }
-
+    alert(teks);
   }
-
 }
+
 /* =========================================================
-   EXPORT BACKUP BARU
+   EXPORT BACKUP
    ========================================================= */
 
 function exportBackup() {
-
   try {
-
     const backup = {
-
-      version: 2,
-
-      exportedAt:
-        new Date().toISOString(),
-
-      data:
-        db.data,
-
-      lokasi:
-        db.lokasi,
-
-      target:
-        db.target,
-
-      bahasa:
-        db.bahasa
-
+      version: 3,
+      exportedAt: new Date().toISOString(),
+      data: db.data,
+      lokasi: db.lokasi,
+      pengeluaran: db.pengeluaran,
+      target: db.target,
+      bahasa: db.bahasa
     };
 
+    const json = JSON.stringify(backup, null, 2);
 
-    const json =
-      JSON.stringify(
-        backup,
-        null,
-        2
-      );
+    const blob = new Blob([json], {
+      type: 'application/json'
+    });
 
+    const url = URL.createObjectURL(blob);
 
-    const blob =
-      new Blob(
-        [json],
-        {
-          type:
-            'application/json'
-        }
-      );
+    const a = document.createElement('a');
 
+    a.href = url;
+    a.download = `gajiku_backup_${formatTanggalFile()}.json`;
 
-    const url =
-      URL.createObjectURL(
-        blob
-      );
-
-
-    const a =
-      document.createElement(
-        'a'
-      );
-
-
-    a.href =
-      url;
-
-
-    a.download =
-      `gajiku_backup_${formatTanggalFile()}.json`;
-
-
-    document.body.appendChild(
-      a
-    );
-
-
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
 
-
-    document.body.removeChild(
-      a
-    );
-
-
-    setTimeout(
-      () => {
-        URL.revokeObjectURL(
-          url
-        );
-      },
-      1000
-    );
-
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
 
   } catch (error) {
-
-    console.error(
-      'Export error:',
-      error
-    );
-
-    alert(
-      'Gagal membuat backup.'
-    );
-
+    console.error('Export error:', error);
+    alert('Gagal membuat backup.');
   }
 }
-
 
 /* =========================================================
    IMPORT BACKUP
    ========================================================= */
 
 function importBackup() {
-
-  const input =
-    document.getElementById(
-      'importFile'
-    );
-
+  const input = document.getElementById('importFile');
 
   if (!input) {
-
-    alert(
-      'Input file tidak ditemukan.'
-    );
-
+    alert('Input file tidak ditemukan.');
     return;
   }
 
+  const file = input.files[0];
 
-  const file =
-    input.files[0];
+  if (!file) return;
 
+  const reader = new FileReader();
 
-  if (!file) {
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result;
 
-    return;
-  }
-
-
-  const reader =
-    new FileReader();
-
-
-  reader.onload =
-    function(e) {
-
-      try {
-
-        const text =
-          e.target.result;
-
-
-        if (
-          !text ||
-          !text.trim()
-        ) {
-
-          throw new Error(
-            'File JSON kosong.'
-          );
-
-        }
-
-
-        let imported;
-
-
-        try {
-
-          imported =
-            JSON.parse(text);
-
-        } catch (err) {
-
-          throw new Error(
-            'File bukan JSON yang valid.'
-          );
-
-        }
-
-
-        console.log(
-          'Isi backup:',
-          imported
-        );
-
-
-        /* =================================================
-           FORMAT BARU
-           ================================================= */
-
-        if (
-          Array.isArray(
-            imported.data
-          ) &&
-          Array.isArray(
-            imported.lokasi
-          )
-        ) {
-
-          db =
-            normalizeDatabase(
-              imported
-            );
-
-        }
-
-
-        /* =================================================
-           FORMAT BACKUP LAMA KAMU
-           ================================================= */
-
-        else if (
-          Array.isArray(
-            imported.db
-          )
-        ) {
-
-          db =
-            convertBackupLama(
-              imported
-            );
-
-        }
-
-
-        /* =================================================
-           FORMAT LAIN
-           ================================================= */
-
-        else {
-
-          throw new Error(
-            'Format backup tidak dikenali.'
-          );
-
-        }
-
-
-        /* =================================================
-           SIMPAN
-           ================================================= */
-
-        simpan();
-
-
-        /* =================================================
-           UPDATE UI
-           ================================================= */
-
-        const select =
-          document.getElementById(
-            'pilihBahasa'
-          );
-
-
-        if (select) {
-
-          select.value =
-            db.bahasa;
-
-        }
-
-
-        updateBahasaUI();
-
-        renderSemua();
-
-
-        /* =================================================
-           BERHASIL
-           ================================================= */
-
-        alert(
-
-          '✅ IMPORT BERHASIL!\n\n' +
-
-          `📋 Data kerja: ${db.data.length}\n` +
-
-          `📍 Lokasi: ${db.lokasi.length}\n` +
-
-          `🎯 Target: ¥${Number(
-            db.target
-          ).toLocaleString()}`
-
-        );
-
-
-        input.value = '';
-
-
-      } catch (error) {
-
-        console.error(
-          'IMPORT ERROR:',
-          error
-        );
-
-
-        alert(
-
-          '❌ IMPORT GAGAL\n\n' +
-          error.message
-
-        );
-
-
-        input.value = '';
-
+      if (!text || !text.trim()) {
+        throw new Error('File JSON kosong.');
       }
 
-    };
+      let imported;
 
+      try {
+        imported = JSON.parse(text);
+      } catch (err) {
+        throw new Error('File bukan JSON yang valid.');
+      }
 
-  reader.onerror =
-    function() {
+      console.log('Isi backup:', imported);
+
+      if (
+        Array.isArray(imported.data) &&
+        Array.isArray(imported.lokasi)
+      ) {
+        db = normalizeDatabase(imported);
+
+      } else if (Array.isArray(imported.db)) {
+        db = convertBackupLama(imported);
+
+      } else {
+        throw new Error('Format backup tidak dikenali.');
+      }
+
+      simpan();
+
+      const select = document.getElementById('pilihBahasa');
+
+      if (select) {
+        select.value = db.bahasa;
+      }
+
+      updateBahasaUI();
+      renderSemua();
 
       alert(
-        '❌ File tidak dapat dibaca.'
+        '✅ IMPORT BERHASIL!\n\n' +
+        `📋 Data kerja: ${db.data.length}\n` +
+        `📍 Lokasi: ${db.lokasi.length}\n` +
+        `💸 Pengeluaran: ${db.pengeluaran.length}\n` +
+        `🎯 Target: ¥${Number(db.target).toLocaleString()}`
       );
 
       input.value = '';
 
-    };
+    } catch (error) {
+      console.error('IMPORT ERROR:', error);
 
+      alert('❌ IMPORT GAGAL\n\n' + error.message);
 
-  reader.readAsText(
-    file
-  );
+      input.value = '';
+    }
+  };
+
+  reader.onerror = function() {
+    alert('❌ File tidak dapat dibaca.');
+    input.value = '';
+  };
+
+  reader.readAsText(file);
 }
-
 
 /* =========================================================
    CONVERTER BACKUP LAMA
    ========================================================= */
 
 function convertBackupLama(oldBackup) {
+  const lokasiLama = Array.isArray(oldBackup.lokasiDb)
+    ? oldBackup.lokasiDb
+    : [];
 
-  /*
-   FORMAT ASLI BACKUP LAMA:
-
-   {
-     db: [
-       {
-         tanggal: "2026-06-04",
-         lokasi: "SHIOMI",
-         jumlah: 11,
-         gaji: 8800
-       }
-     ],
-
-     lokasiDb: [
-       {
-         nama: "SHIOMI",
-         tarif: 800,
-         jenis: "kamar"
-       }
-     ],
-
-     pengeluaranDb: [],
-
-     targetBulanan: 250000
-   }
-  */
-
-
-  const lokasiLama =
-    Array.isArray(
-      oldBackup.lokasiDb
-    )
-      ? oldBackup.lokasiDb
-      : [];
-
-
-  const dataLama =
-    Array.isArray(
-      oldBackup.db
-    )
-      ? oldBackup.db
-      : [];
-
-
-  /*
-   Buat lokasi baru
-  */
+  const dataLama = Array.isArray(oldBackup.db)
+    ? oldBackup.db
+    : [];
 
   const lokasi = [];
 
+  lokasiLama.forEach((l, index) => {
+    lokasi.push({
+      id: Date.now() + index,
+      nama: String(l.nama || ''),
+      tarif: Number(l.tarif) || 0,
+      jenis: ['kamar', 'jam', 'borongan'].includes(l.jenis)
+        ? l.jenis
+        : 'kamar'
+    });
+  });
 
-  lokasiLama.forEach(
-    (l, index) => {
+  dataLama.forEach(oldData => {
+    const nama = String(oldData.lokasi || '');
 
+    const sudahAda = lokasi.some(l => l.nama === nama);
+
+    if (nama && !sudahAda) {
       lokasi.push({
-
-        id:
-          Date.now() +
-          index,
-
-        nama:
-          String(
-            l.nama || ''
-          ),
-
-        tarif:
-          Number(
-            l.tarif
-          ) || 0,
-
-        jenis:
-          ['kamar', 'jam', 'borongan']
-            .includes(l.jenis)
-            ? l.jenis
-            : 'kamar'
-
+        id: Date.now() + lokasi.length,
+        nama,
+        tarif: Number(oldData.gaji) || 0,
+        jenis: 'kamar'
       });
-
     }
-  );
+  });
 
-
-  /*
-   Kalau ada data kerja yang menyebut lokasi
-   tetapi lokasinya tidak ada di lokasiDb,
-   buat otomatis.
-  */
-
-  dataLama.forEach(
-    oldData => {
-
-      const nama =
-        String(
-          oldData.lokasi || ''
-        );
-
-
-      const sudahAda =
-        lokasi.some(
-          l =>
-            l.nama === nama
-        );
-
-
-      if (
-        nama &&
-        !sudahAda
-      ) {
-
-        lokasi.push({
-
-          id:
-            Date.now() +
-            lokasi.length,
-
-          nama,
-
-          tarif:
-            Number(
-              oldData.gaji
-            ) || 0,
-
-          jenis:
-            'kamar'
-
-        });
-
-      }
-
-    }
-  );
-
-
-  /*
-   Buat mapping:
-   nama lokasi -> lokasi baru
-  */
-
-  const getLokasi =
-    nama => {
-
-      return lokasi.find(
-        l =>
-          l.nama ===
-          String(nama)
-      );
-
-    };
-
-
-  /*
-   Konversi data lama
-  */
+  const getLokasi = nama => {
+    return lokasi.find(l => l.nama === String(nama));
+  };
 
   const data = [];
 
+  dataLama.forEach((oldData, index) => {
+    const lokasiData = getLokasi(oldData.lokasi);
 
-  dataLama.forEach(
-    (oldData, index) => {
+    if (!lokasiData) return;
 
-      const lokasi =
-        getLokasi(
-          oldData.lokasi
-        );
+    const total = Number(oldData.gaji) || 0;
 
+    data.push({
+      id: Date.now() + index,
+      tanggal: String(oldData.tanggal || ''),
+      lokasiId: Number(lokasiData.id),
+      lokasiNama: lokasiData.nama,
+      jumlah: Number(oldData.jumlah) || 0,
+      total,
+      jenis: lokasiData.jenis
+    });
+  });
 
-      if (!lokasi) {
-        return;
-      }
+  /* KONVERSI PENGELUARAN LAMA */
 
+  const pengeluaranLama = Array.isArray(oldBackup.pengeluaranDb)
+    ? oldBackup.pengeluaranDb
+    : [];
 
-      /*
-       PENTING:
-
-       Kita memakai nilai `gaji`
-       dari backup lama sebagai `total`.
-
-       Jadi histori tidak dihitung ulang
-       menggunakan tarif sekarang.
-      */
-
-      const total =
-        Number(
-          oldData.gaji
-        ) || 0;
-
-
-      data.push({
-
-        id:
-          Date.now() +
-          index,
-
-        tanggal:
-          String(
-            oldData.tanggal || ''
-          ),
-
-        lokasiId:
-          Number(
-            lokasi.id
-          ),
-
-        lokasiNama:
-          lokasi.nama,
-
-        jumlah:
-          Number(
-            oldData.jumlah
-          ) || 0,
-
-        total,
-
-        jenis:
-          lokasi.jenis
-
-      });
-
-    }
-  );
-
+  const pengeluaran = pengeluaranLama.map((p, index) => ({
+    id: Number(p.id) || Date.now() + 20000 + index,
+    tanggal: String(p.tanggal || ''),
+    jumlah: Number(
+      p.jumlah ?? p.total ?? p.pengeluaran ?? p.nominal
+    ) || 0,
+    keterangan: String(
+      p.keterangan || p.nama || p.catatan || p.deskripsi || 'Pengeluaran'
+    )
+  })).filter(p => p.tanggal && p.jumlah > 0);
 
   return {
-
     data,
-
     lokasi,
-
-    target:
-      Number(
-        oldBackup.targetBulanan
-      ) || 250000,
-
-    bahasa:
-      'id'
-
+    pengeluaran,
+    target: Number(oldBackup.targetBulanan) || 250000,
+    bahasa: 'id'
   };
 }
 
+/* =========================================================
+   FITUR PENGELUARAN
+   ========================================================= */
+
+function tanggalHariIni() {
+  const d = new Date();
+
+  return (
+    d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0')
+  );
+}
+
+function openPopupPengeluaran(id = null) {
+  const popup = document.getElementById('popupPengeluaran');
+
+  if (!popup) {
+    alert('Popup pengeluaran belum tersedia. Periksa index.html.');
+    return;
+  }
+
+  document.getElementById('pengeluaranId').value = id || '';
+
+  if (id !== null) {
+    const item = db.pengeluaran.find(p => p.id == id);
+
+    if (!item) {
+      alert('Data pengeluaran tidak ditemukan.');
+      return;
+    }
+
+    document.getElementById('judulPopupPengeluaran').innerText =
+      '✏️ Edit Pengeluaran';
+
+    document.getElementById('pengeluaranTanggal').value =
+      item.tanggal;
+
+    document.getElementById('pengeluaranJumlah').value =
+      item.jumlah;
+
+    document.getElementById('pengeluaranKeterangan').value =
+      item.keterangan;
+
+  } else {
+    document.getElementById('judulPopupPengeluaran').innerText =
+      '💸 Tambah Pengeluaran';
+
+    document.getElementById('pengeluaranTanggal').value =
+      tanggalAktifPopup || tanggalHariIni();
+
+    document.getElementById('pengeluaranJumlah').value = '';
+    document.getElementById('pengeluaranKeterangan').value = '';
+  }
+
+  popup.style.display = 'block';
+  document.getElementById('popupOverlay2').style.display = 'block';
+}
+
+function closePopupPengeluaran() {
+  const popup = document.getElementById('popupPengeluaran');
+
+  if (popup) {
+    popup.style.display = 'none';
+  }
+
+  const overlay = document.getElementById('popupOverlay2');
+
+  if (overlay) {
+    overlay.style.display = 'none';
+  }
+}
+
+function simpanPengeluaran() {
+  const id = document.getElementById('pengeluaranId').value;
+
+  const tanggal = document.getElementById('pengeluaranTanggal').value;
+
+  const jumlah = Number(
+    document.getElementById('pengeluaranJumlah').value
+  );
+
+  const keterangan = document.getElementById(
+    'pengeluaranKeterangan'
+  ).value.trim();
+
+  if (
+    !tanggal ||
+    !Number.isFinite(jumlah) ||
+    jumlah <= 0 ||
+    !keterangan
+  ) {
+    alert('Isi tanggal, jumlah, dan keterangan dengan benar.');
+    return;
+  }
+
+  if (id) {
+    const item = db.pengeluaran.find(p => p.id == id);
+
+    if (!item) {
+      alert('Data pengeluaran tidak ditemukan.');
+      return;
+    }
+
+    item.tanggal = tanggal;
+    item.jumlah = jumlah;
+    item.keterangan = keterangan;
+
+  } else {
+    db.pengeluaran.push({
+      id: Date.now(),
+      tanggal,
+      jumlah,
+      keterangan
+    });
+  }
+
+  simpan();
+  renderSemua();
+  closePopupPengeluaran();
+
+  alert('Pengeluaran berhasil disimpan!');
+}
+
+function hapusPengeluaran(id) {
+  if (!confirm('Yakin ingin menghapus pengeluaran ini?')) {
+    return;
+  }
+
+  db.pengeluaran = db.pengeluaran.filter(p => p.id != id);
+
+  simpan();
+  renderSemua();
+}
+
+function renderPengeluaran() {
+  const bulanIni =
+    `${bulanAktif.getFullYear()}-${String(
+      bulanAktif.getMonth() + 1
+    ).padStart(2, '0')}`;
+
+  const dataBulan = db.pengeluaran.filter(
+    p => p.tanggal.startsWith(bulanIni)
+  );
+
+  const totalGaji = db.data
+    .filter(d => d.tanggal.startsWith(bulanIni))
+    .reduce((total, d) => total + Number(d.total || 0), 0);
+
+  const totalPengeluaran = dataBulan.reduce(
+    (total, p) => total + Number(p.jumlah || 0),
+    0
+  );
+
+  const bersih = totalGaji - totalPengeluaran;
+
+  const ringkasanGaji = document.getElementById('ringkasanGaji');
+  const ringkasanPengeluaran = document.getElementById('ringkasanPengeluaran');
+  const gajiBersih = document.getElementById('gajiBersih');
+
+  if (ringkasanGaji) {
+    ringkasanGaji.innerText = `¥${totalGaji.toLocaleString()}`;
+  }
+
+  if (ringkasanPengeluaran) {
+    ringkasanPengeluaran.innerText =
+      `¥${totalPengeluaran.toLocaleString()}`;
+  }
+
+  if (gajiBersih) {
+    gajiBersih.innerText = `¥${bersih.toLocaleString()}`;
+  }
+
+  const daftar = document.getElementById('daftarPengeluaran');
+
+  if (!daftar) return;
+
+  if (dataBulan.length === 0) {
+    daftar.innerHTML =
+      '<div class="expense-empty">Belum ada pengeluaran bulan ini.</div>';
+    return;
+  }
+
+  daftar.innerHTML = [...dataBulan]
+    .sort((a, b) => b.tanggal.localeCompare(a.tanggal))
+    .map(p => `
+      <div class="expense-item">
+        <div class="expense-item-info">
+          <b>${escapeHTML(p.keterangan)}</b>
+          <small>${escapeHTML(p.tanggal)}</small>
+          <div class="expense-amount">
+            -¥${Number(p.jumlah).toLocaleString()}
+          </div>
+        </div>
+
+        <div class="expense-item-actions">
+          <button
+            class="btn-kecil"
+            style="background:#3b82f6"
+            onclick="openPopupPengeluaran(${p.id})">
+            Edit
+          </button>
+
+          <button
+            class="btn-kecil btn-danger"
+            onclick="hapusPengeluaran(${p.id})">
+            Hapus
+          </button>
+        </div>
+      </div>
+    `).join('');
+}
 
 /* =========================================================
    UTILITAS
    ========================================================= */
 
 function formatTanggalFile() {
-
-  const d =
-    new Date();
-
+  const d = new Date();
 
   return (
-
     d.getFullYear() +
-
-    String(
-      d.getMonth() + 1
-    ).padStart(
-      2,
-      '0'
-    ) +
-
-    String(
-      d.getDate()
-    ).padStart(
-      2,
-      '0'
-    ) +
-
+    String(d.getMonth() + 1).padStart(2, '0') +
+    String(d.getDate()).padStart(2, '0') +
     '_' +
-
-    String(
-      d.getHours()
-    ).padStart(
-      2,
-      '0'
-    ) +
-
-    String(
-      d.getMinutes()
-    ).padStart(
-      2,
-      '0'
-    )
-
+    String(d.getHours()).padStart(2, '0') +
+    String(d.getMinutes()).padStart(2, '0')
   );
 }
 
-
 function escapeHTML(value) {
-
   return String(value)
-
-    .replace(
-      /&/g,
-      '&amp;'
-    )
-
-    .replace(
-      /</g,
-      '&lt;'
-    )
-
-    .replace(
-      />/g,
-      '&gt;'
-    )
-
-    .replace(
-      /"/g,
-      '&quot;'
-    )
-
-    .replace(
-      /'/g,
-      '&#039;'
-    );
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
-
 
 /* =========================================================
    DEBUG
    ========================================================= */
 
 window.GajiKuDB = {
-
   lihat: function() {
-
-    console.log(
-      JSON.parse(
-        JSON.stringify(db)
-      )
-    );
-
+    console.log(JSON.parse(JSON.stringify(db)));
   },
 
-
   reset: function() {
+    if (!confirm('Hapus SEMUA data GajiKu?')) return;
 
-    if (
-      !confirm(
-        'Hapus SEMUA data GajiKu?'
-      )
-    ) {
-      return;
-    }
-
-
-    localStorage.removeItem(
-      'gajikuDB'
-    );
-
-
+    localStorage.removeItem('gajikuDB');
     location.reload();
-
   }
-
 };
