@@ -1,146 +1,348 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💼 GajiKu Jepang</title>
-<link rel="stylesheet" href="style.css?v=14">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#111827">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
+  <title>GajiKu Jepang</title>
+  <link rel="stylesheet" href="style.css?v=16">
 </head>
+
 <body>
-<div class="container">
-<header>
-  <div class="header-top">
-    <div>
-      <h1>💼 GajiKu Jepang</h1>
-      <p id="subJudul">Pengelola Gaji & Absensi</p>
+  <div class="app-container">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-top">
+        <div>
+          <h1>GajiKu Jepang</h1>
+          <p id="judulHeaderBulan">Catatan gaji bulanan</p>
+        </div>
+
+        <select id="pilihanBahasa" onchange="gantiBahasa(this.value)">
+          <option value="id">🇮🇩 Indonesia</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="jp">🇯🇵 日本語</option>
+        </select>
+      </div>
+
+      <div class="total-card">
+        <p id="labelTotalGaji">Total Gaji Bulan Ini</p>
+        <h2 id="totalGaji">¥0</h2>
+        <div class="target-info">
+          <span id="targetText">Target: ¥250,000</span>
+          <span id="progressText">0%</span>
+        </div>
+        <div class="progress-container">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- NAVIGASI BULAN -->
+    <section class="month-navigation">
+      <button type="button" onclick="gantiBulan(-1)">❮</button>
+      <h2 id="bulanTahun"></h2>
+      <button type="button" onclick="gantiBulan(1)">❯</button>
+    </section>
+
+    <!-- KALENDER -->
+    <section class="calendar-section">
+      <div class="calendar-weekdays">
+        <div>Min</div>
+        <div>Sen</div>
+        <div>Sel</div>
+        <div>Rab</div>
+        <div>Kam</div>
+        <div>Jum</div>
+        <div>Sab</div>
+      </div>
+
+      <div id="kalender" class="calendar-grid"></div>
+    </section>
+
+    <!-- TOMBOL UTAMA -->
+    <section class="main-actions">
+      <button type="button" class="primary-button" onclick="openPopupInputDariDetail()">
+        ＋ Tambah Gaji
+      </button>
+
+      <button type="button" class="secondary-button" onclick="openPopupLokasi()">
+        ⚙ Kelola Lokasi
+      </button>
+
+      <button type="button" class="secondary-button" onclick="openPopupStatistik()">
+        📊 Statistik
+      </button>
+
+      <button type="button" class="secondary-button" onclick="openPopupRekap()">
+        📋 Rekap Bulanan
+      </button>
+    </section>
+
+    <!-- TARGET -->
+    <section class="target-section">
+      <div class="section-heading">
+        <h3>🎯 Target Gaji</h3>
+        <button type="button" onclick="ubahTarget()">Ubah Target</button>
+      </div>
+      <p id="targetTextDetail">Target bulanan: ¥250,000</p>
+    </section>
+
+    <!-- RINGKASAN KEUANGAN -->
+    <section id="ringkasanKeuangan" class="finance-section">
+      <div class="section-heading">
+        <h3>💰 Ringkasan Keuangan</h3>
+        <button type="button" onclick="openPopupPengeluaran()">＋ Pengeluaran</button>
+      </div>
+
+      <div class="finance-summary-grid">
+        <div class="finance-summary-item">
+          <span>Gaji Kotor</span>
+          <strong id="totalGajiKotor">¥0</strong>
+        </div>
+
+        <div class="finance-summary-item">
+          <span>Total Pengeluaran</span>
+          <strong id="totalPengeluaranBulan">¥0</strong>
+        </div>
+
+        <div class="finance-summary-item net-summary">
+          <span>Gaji Bersih</span>
+          <strong id="totalGajiBersih">¥0</strong>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        id="btnToggleRincianKeuangan"
+        class="detail-toggle-button"
+        onclick="toggleRincianKeuangan()"
+      >
+        Lihat rincian pengeluaran ▼
+      </button>
+
+      <div id="rincianKeuangan" class="finance-details" style="display:none;">
+        <div id="isiDaftarPengeluaran">
+          <p>Belum ada pengeluaran bulan ini.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BACKUP & DATA -->
+    <section class="backup-section">
+      <h3>💾 Backup & Data</h3>
+
+      <div class="backup-buttons">
+        <button type="button" onclick="exportBackup()">
+          📥 Export Backup
+        </button>
+
+        <button type="button" onclick="document.getElementById('importFile').click()">
+          📤 Import Backup
+        </button>
+
+        <input
+          type="file"
+          id="importFile"
+          accept=".json,application/json"
+          onchange="importBackup(event)"
+          hidden
+        />
+      </div>
+
+      <button type="button" class="share-button" onclick="shareLaporan()">
+        📲 Bagikan Laporan Bulanan
+      </button>
+    </section>
+
+    <footer class="app-footer">
+      <p>GajiKu Jepang © 2026</p>
+    </footer>
+  </div>
+
+  <!-- OVERLAY -->
+  <div id="popupOverlay2" class="popup-overlay" onclick="closeSemuaPopup()"></div>
+
+  <!-- POPUP DETAIL TANGGAL -->
+  <div id="popupDetail" class="popup">
+    <div class="popup-header">
+      <h3 id="judulPopupDetail">Detail Gaji</h3>
+      <button type="button" onclick="closePopupDetail()">✕</button>
     </div>
-    <select id="pilihBahasa" onchange="gantiBahasa()">
-      <option value="id">🇮🇩 ID</option>
-      <option value="en">🇬🇧 EN</option>
-      <option value="jp">🇯🇵 JP</option>
-    </select>
+    <div id="isiPopupDetail"></div>
   </div>
-</header>
 
-<section class="card dashboard">
-  <div class="kalender-nav">
-    <button onclick="gantiBulanHeader(-1)">‹</button>
-    <h2 id="judulHeaderBulan">💴 Pendapatan Bulan Ini</h2>
-    <button onclick="gantiBulanHeader(1)">›</button>
+  <!-- POPUP INPUT GAJI -->
+  <div id="popupInput" class="popup">
+    <div class="popup-header">
+      <h3>Tambah Gaji</h3>
+      <button type="button" onclick="closePopupInput()">✕</button>
+    </div>
+
+    <div class="popup-content">
+      <label for="inputTanggal">Tanggal</label>
+      <input type="date" id="inputTanggal">
+
+      <label for="inputLokasi">Lokasi Kerja</label>
+      <select id="inputLokasi"></select>
+
+      <div id="inputJumlahContainer">
+        <label for="inputJumlah">Jumlah Kamar / Jam</label>
+        <input
+          type="number"
+          id="inputJumlah"
+          min="0"
+          step="0.5"
+          placeholder="Contoh: 10"
+        >
+      </div>
+
+      <label for="inputGaji">Total Gaji (¥)</label>
+      <input
+        type="number"
+        id="inputGaji"
+        min="0"
+        placeholder="Contoh: 8000"
+      >
+
+      <label for="inputCatatan">Catatan</label>
+      <textarea id="inputCatatan" placeholder="Catatan tambahan (opsional)"></textarea>
+
+      <button type="button" class="primary-button" onclick="simpanDataDariPopup()">
+        Simpan Gaji
+      </button>
+    </div>
   </div>
-  <div id="totalGaji" class="total">¥0</div>
-</section>
 
-<section class="card">
-  <h2 id="judulKalender">🗓️ Kalender</h2>
-  <div class="kalender-nav">
-    <button onclick="gantiBulan(-1)">‹</button>
-    <span id="bulanTahun"></span>
-    <button onclick="gantiBulan(1)">›</button>
+  <!-- POPUP EDIT GAJI -->
+  <div id="popupEdit" class="popup">
+    <div class="popup-header">
+      <h3>Edit Gaji</h3>
+      <button type="button" onclick="closePopupEdit()">✕</button>
+    </div>
+
+    <div class="popup-content">
+      <input type="hidden" id="editId">
+
+      <label for="editTanggal">Tanggal</label>
+      <input type="date" id="editTanggal">
+
+      <label for="editLokasi">Lokasi Kerja</label>
+      <select id="editLokasi"></select>
+
+      <label for="editJumlah">Jumlah Kamar / Jam</label>
+      <input type="number" id="editJumlah" min="0" step="0.5">
+
+      <label for="editGaji">Total Gaji (¥)</label>
+      <input type="number" id="editGaji" min="0">
+
+      <label for="editCatatan">Catatan</label>
+      <textarea id="editCatatan"></textarea>
+
+      <button type="button" class="primary-button" onclick="simpanEdit()">
+        Simpan Perubahan
+      </button>
+    </div>
   </div>
-  <div id="kalender" class="kalender-grid"></div>
-</section>
 
-<section class="card">
-  <h2 id="judulStatistik">📈 Statistik</h2>
-  <button onclick="openPopupStatistik()" style="background:#8b5cf6">📊 Lihat Detail Statistik</button>
-</section>
+  <!-- POPUP TAMBAH / EDIT PENGELUARAN -->
+  <div id="popupPengeluaran" class="popup">
+    <div class="popup-header">
+      <h3 id="judulPopupPengeluaran">Tambah Pengeluaran</h3>
+      <button type="button" onclick="closePopupPengeluaran()">✕</button>
+    </div>
 
-<section class="card">
-  <h2 id="judulRekap">📅 Rekap Bulanan</h2>
-  <button onclick="openPopupRekap()" style="background:#f59e0b">📊 Lihat Riwayat Semua Bulan</button>
-  <div id="totalSejakAwal" style="margin-top:12px;padding-top:12px;border-top:1px solid #374151"></div>
-  <button onclick="shareLaporan()" style="background:#10b981;margin-top:12px">📤 Share Laporan Bulan Ini</button>
-</section>
+    <div class="popup-content">
+      <input type="hidden" id="pengeluaranEditId">
 
-<section class="card target-box">
-  <h2 id="judulTarget">🎯 Target Bulanan</h2>
-  <div id="targetText">¥250,000</div>
-  <div class="progress"><div id="progressBar"></div></div>
-  <p id="progressText">0%</p>
-  <button onclick="ubahTarget()">✏️ Ubah Target</button>
-</section>
+      <label for="pengeluaranTanggal">Tanggal</label>
+      <input type="date" id="pengeluaranTanggal">
 
-<section class="card">
-  <h2 id="judulBackup">💾 Backup & Data</h2>
-  <div style="display:flex; gap:8px">
-    <button onclick="exportBackup()">⬇️ Export</button>
-    <button onclick="document.getElementById('importFile').click()" style="background:#3b82f6">⬆️ Import</button>
+      <label for="pengeluaranJumlah">Jumlah Pengeluaran (¥)</label>
+      <input
+        type="number"
+        id="pengeluaranJumlah"
+        min="1"
+        placeholder="Contoh: 3000"
+      >
+
+      <label for="pengeluaranKeterangan">Keterangan</label>
+      <input
+        type="text"
+        id="pengeluaranKeterangan"
+        placeholder="Contoh: Makan, transportasi, belanja"
+      >
+
+      <button
+        type="button"
+        id="btnSimpanPengeluaran"
+        class="primary-button"
+        onclick="simpanPengeluaran()"
+      >
+        Simpan Pengeluaran
+      </button>
+    </div>
   </div>
-  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup()">
 
-  <h2 id="judulInput" style="margin-top:16px">📝 Kelola Lokasi</h2>
-  <button onclick="openPopupLokasi()" style="background:#3b82f6">➕ Tambah Lokasi</button>
-  <button onclick="openPopupDaftarLokasi()" style="background:#6366f1">👀 Lihat Daftar Lokasi</button>
-</section>
+  <!-- POPUP STATISTIK -->
+  <div id="popupStatistik" class="popup">
+    <div class="popup-header">
+      <h3>📊 Statistik Bulanan</h3>
+      <button type="button" onclick="closePopupStatistik()">✕</button>
+    </div>
+    <div id="isiStatistikPopup" class="popup-content"></div>
+  </div>
 
-</div>
+  <!-- POPUP LOKASI -->
+  <div id="popupLokasi" class="popup">
+    <div class="popup-header">
+      <h3>⚙ Tambah Lokasi Kerja</h3>
+      <button type="button" onclick="closePopupLokasi()">✕</button>
+    </div>
 
-<!-- POPUP DETAIL KALENDER + INPUT -->
-<div id="popupDetail" class="popup">
-  <h3 id="judulDetail"></h3>
-  <div id="isiDetail"></div>
-  <button onclick="openPopupInputDariDetail()" style="background:#10b981">➕ Tambah Data</button>
-  <button onclick="closePopupDetail()" class="btn-danger">Tutup</button>
-</div>
+    <div class="popup-content">
+      <label for="namaLokasi">Nama Lokasi</label>
+      <input type="text" id="namaLokasi" placeholder="Contoh: HOTEL EAST">
 
-<div id="popupInput" class="popup">
-  <h3 id="judulInputPopup">📝 Input Data</h3>
-  <p id="inputTanggalText" style="color:#9ca3af; font-size:14px; margin-top:-8px"></p>
-  <input type="hidden" id="inputTanggal">
-  <select id="inputLokasi"><option value="">Pilih Lokasi</option></select>
-  <input type="number" inputmode="decimal" step="0.1" id="inputJumlah" placeholder="Jumlah kamar / jam">
-  <button onclick="simpanDataDariPopup()">💾 Simpan</button>
-  <button onclick="closePopupInput()" class="btn-danger">Batal</button>
-</div>
+      <label for="tipeLokasi">Tipe Perhitungan</label>
+      <select id="tipeLokasi">
+        <option value="kamar">Per Kamar</option>
+        <option value="jam">Per Jam</option>
+        <option value="manual">Manual</option>
+      </select>
 
-<!-- POPUP STATISTIK BARU -->
-<div id="popupStatistik" class="popup">
-  <h3 id="judulStatistikPopup">📈 Statistik Bulan Ini</h3>
-  <div id="isiStatistikPopup"></div>
-  <button onclick="closePopupStatistik()" class="btn-danger">Tutup</button>
-</div>
+      <label for="tarifLokasi">Tarif (¥)</label>
+      <input type="number" id="tarifLokasi" min="0" placeholder="Contoh: 800">
 
-<!-- POPUP LAINNYA -->
-<div id="popupLokasi" class="popup">
-  <h3 id="judulTambahLokasi">➕ Tambah Lokasi Baru</h3>
-  <input type="text" id="namaLokasi" placeholder="Nama Lokasi">
-  <input type="number" inputmode="numeric" id="tarifLokasi" placeholder="Tarif per kamar/jam">
-  <select id="jenisLokasi">
-    <option value="kamar">Per Kamar</option>
-    <option value="jam">Per Jam</option>
-    <option value="borongan">Borongan</option>
-  </select>
-  <button onclick="simpanLokasiBaru()">💾 Simpan</button>
-  <button onclick="closePopupLokasi()" class="btn-danger">Batal</button>
-</div>
+      <button type="button" class="primary-button" onclick="simpanLokasiBaru()">
+        Simpan Lokasi
+      </button>
 
-<div id="popupDaftarLokasi" class="popup">
-  <h3 id="judulDaftarLokasi">📋 Daftar Lokasi</h3>
-  <div id="isiDaftarLokasi"></div>
-  <button onclick="closePopupDaftarLokasi()" class="btn-danger">Tutup</button>
-</div>
+      <button type="button" class="secondary-button" onclick="openPopupDaftarLokasi()">
+        Lihat Daftar Lokasi
+      </button>
+    </div>
+  </div>
 
-<div id="popupRekap" class="popup">
-  <h3>📊 Riwayat Pemasukan</h3>
-  <div id="isiRekap"></div>
-  <button onclick="closePopupRekap()" class="btn-danger">Tutup</button>
-</div>
+  <!-- POPUP DAFTAR LOKASI -->
+  <div id="popupDaftarLokasi" class="popup">
+    <div class="popup-header">
+      <h3>Daftar Lokasi Kerja</h3>
+      <button type="button" onclick="closePopupDaftarLokasi()">✕</button>
+    </div>
+    <div id="isiDaftarLokasi" class="popup-content"></div>
+  </div>
 
-<div id="popupEdit" class="popup">
-  <h3 id="judulEdit">✏️ Edit Data</h3>
-  <input type="date" id="editTanggal">
-  <select id="editLokasi"></select>
-  <input type="number" inputmode="decimal" step="0.1" id="editJumlah" placeholder="Jumlah">
-  <button onclick="simpanEdit()">💾 Simpan Perubahan</button>
-  <button onclick="closePopupEdit()" class="btn-danger">Batal</button>
-</div>
+  <!-- POPUP REKAP -->
+  <div id="popupRekap" class="popup">
+    <div class="popup-header">
+      <h3>📋 Rekap Bulanan</h3>
+      <button type="button" onclick="closePopupRekap()">✕</button>
+    </div>
+    <div id="isiRekap" class="popup-content"></div>
+  </div>
 
-<div id="popupOverlay2" onclick="closeSemuaPopup()"></div>
-
-<footer>💼 GajiKu Jepang <br>Design by Anamgambut</footer>
-<script src="app.js?v=15"></script>
+  <script src="app.js?v=16"></script>
 </body>
 </html>
