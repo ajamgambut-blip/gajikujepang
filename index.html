@@ -40,6 +40,7 @@
           <div id="progressBar" class="progress-bar"></div>
         </div>
       </div>
+
     </header>
 
     <!-- NAVIGASI BULAN -->
@@ -108,6 +109,16 @@
 
       <p id="targetTextDetail">Target bulanan: ¥250,000</p>
     </section>
+
+    <!-- TOTAL GAJI SEJAK AWAL -->
+<section class="target-section">
+  <div class="section-heading">
+    <h3>💰 Total Gaji Sejak Awal</h3>
+  </div>
+
+  <h2 id="totalSejakAwal">¥0</h2>
+  <p>Akumulasi seluruh pendapatan dari semua data kerja</p>
+</section>
 
     <!-- RINGKASAN KEUANGAN -->
     <section id="ringkasanKeuangan" class="finance-section">
@@ -196,9 +207,9 @@
     </section>
 
     <footer class="app-footer">
-  <p>GajiKu Jepang © 2026</p>
-  <p>Developed by Anamgambut</p>
-</footer>
+      <p>GajiKu Jepang © 2026</p>
+      <p>Developed by Anamgambut</p>
+    </footer>
 
   </div>
 
@@ -222,12 +233,11 @@
   <!-- POPUP INPUT GAJI -->
   <div id="popupInput" class="popup">
     <div class="popup-header">
-      <h3>Tambah Gaji</h3>
+      <h3>Tambah Hasil Kerja</h3>
       <button type="button" onclick="closePopupInput()">✕</button>
     </div>
 
     <div class="popup-content">
-
       <p id="inputTanggalText"></p>
 
       <label for="inputTanggal">Tanggal</label>
@@ -247,28 +257,13 @@
         >
       </div>
 
-      <label for="inputGaji">Total Gaji (¥)</label>
-      <input
-        type="number"
-        id="inputGaji"
-        min="0"
-        placeholder="Contoh: 8000"
-      >
-
-      <label for="inputCatatan">Catatan</label>
-      <textarea
-        id="inputCatatan"
-        placeholder="Catatan tambahan (opsional)"
-      ></textarea>
-
       <button
         type="button"
         class="primary-button"
         onclick="simpanDataDariPopup()"
       >
-        Simpan Gaji
+        Simpan Hasil Kerja
       </button>
-
     </div>
   </div>
 
@@ -280,7 +275,6 @@
     </div>
 
     <div class="popup-content">
-
       <input type="hidden" id="editId">
 
       <label for="editTanggal">Tanggal</label>
@@ -310,7 +304,6 @@
       >
         Simpan Perubahan
       </button>
-
     </div>
   </div>
 
@@ -327,7 +320,6 @@
     </div>
 
     <div class="popup-content">
-
       <input type="hidden" id="pengeluaranId">
 
       <label for="pengeluaranTanggal">Tanggal</label>
@@ -356,7 +348,6 @@
       >
         Simpan Pengeluaran
       </button>
-
     </div>
   </div>
 
@@ -388,7 +379,6 @@
     </div>
 
     <div class="popup-content">
-
       <label for="namaLokasi">Nama Lokasi</label>
       <input
         type="text"
@@ -426,7 +416,6 @@
       >
         Lihat Daftar Lokasi
       </button>
-
     </div>
   </div>
 
