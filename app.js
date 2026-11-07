@@ -1265,7 +1265,7 @@ function cekPengingatBackupBulanan() {
   const lanjut = confirm(
     '🔔 JANGAN LUPA BACKUP DATA YA !\n\n' +
     'Bulan sudah berganti.\n\n' +
-    'Amankan seluruh data GajiKu kamu sebelum terjadi sesuatu pada HP atau browser.\n\n' +
+    'Amankan seluruh data Gaji kamu sebelum terjadi sesuatu pada HP atau browser.\n\n' +
     'Tekan OK untuk membuat backup sekarang.'
   );
 
