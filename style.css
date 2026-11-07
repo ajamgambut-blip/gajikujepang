@@ -1,268 +1,813 @@
-* { 
-  box-sizing: border-box; 
-  -webkit-tap-highlight-color: transparent;
+/* =====================================================
+   GAJIKU JEPANG - STYLE.CSS
+   Tema gelap + fitur pengeluaran
+===================================================== */
+
+:root {
+  --bg: #111827;
+  --card: #1f2937;
+  --card-light: #273449;
+  --border: #374151;
+  --text: #f9fafb;
+  --muted: #9ca3af;
+  --blue: #3b82f6;
+  --blue-dark: #2563eb;
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f59e0b;
+  --purple: #8b5cf6;
 }
 
-body { 
-  font-family: system-ui, -apple-system, sans-serif; 
-  background: #111827; 
-  color: #f3f4f6; 
-  margin: 0; 
-  padding: 16px; 
-}
-
-.container { 
-  max-width: 600px; 
-  margin: auto; 
-}
-
-.header-top { 
-  display:flex; 
-  justify-content:space-between; 
-  align-items:center; 
-  margin-bottom:20px; 
-}
-
-header h1 { 
-  margin: 0; 
-  font-size: 24px; 
-}
-
-header p { 
-  margin: 4px 0 0; 
-  color: #9ca3af; 
-  font-size: 14px; 
-}
-
-#pilihBahasa { 
-  background: #374151; 
-  border: 1px solid #4b5563; 
-  color: white; 
-  border-radius: 8px; 
-  padding:6px 8px; 
-  width:90px; 
-  font-size:12px; 
-}
-
-.card { 
-  background: #1f2937; 
-  border: 1px solid #374151; 
-  border-radius: 16px; 
-  padding: 18px; 
-  margin-bottom: 16px; 
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-}
-
-.card h2 { 
-  margin: 0 0 12px; 
-  font-size: 18px; 
-}
-
-.card h3 { 
-  margin: 0 0 8px; 
-  font-size: 15px; 
-  color: #d1d5db; 
-}
-
-button { 
-  background: #10b981; 
-  color: white; 
-  border: none; 
-  padding: 12px 18px; 
-  border-radius: 10px; 
-  font-weight: bold; 
-  cursor: pointer; 
-  width: 100%; 
-  font-size: 15px; 
-  transition: 0.2s; 
-  margin-top: 8px; 
-}
-
-button:hover { 
-  background: #059669; 
-}
-
-.btn-danger { 
-  background: #ef4444; 
-}
-
-.btn-danger:hover { 
-  background: #dc2626; 
-}
-
-.btn-kecil { 
-  width:auto; 
-  padding:6px 10px; 
-  font-size:12px; 
-}
-
-/* FIX INPUT MELEBAR */
-input, select {
-  width: 100%; 
-  padding: 12px; 
-  margin: 8px 0 12px; 
-  background: #374151;
-  border: 1px solid #4b5563; 
-  border-radius: 10px; 
-  color: white; 
-  font-size: 15px;
+* {
   box-sizing: border-box;
-  -webkit-appearance: none;
-  appearance: none;
+  margin: 0;
+  padding: 0;
 }
 
-input::placeholder { 
-  color: #9ca3af; 
+html {
+  scroll-behavior: smooth;
 }
 
-.total { 
-  font-size: 32px; 
-  font-weight: bold; 
-  color: #10b981; 
-  margin: 8px 0; 
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
 }
 
-.target-box { 
-  background: #111827; 
-  padding: 12px; 
-  border-radius: 12px; 
-  margin-top: 12px; 
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
-.target-box #targetText { 
-  font-size: 18px; 
-  font-weight: bold; 
+button {
+  cursor: pointer;
+  border: none;
+  color: white;
+  transition: 0.2s ease;
 }
 
-.progress { 
-  background: #374151; 
-  border-radius: 20px; 
-  height: 10px; 
-  margin: 8px 0; 
-  overflow: hidden; 
+button:active {
+  transform: scale(0.97);
 }
 
-#progressBar { 
-  background: #10b981; 
-  height: 100%; 
-  width: 0%; 
-  border-radius: 20px; 
-  transition: 0.5s; 
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: #111827;
+  color: white;
+  outline: none;
+  margin-top: 6px;
+  margin-bottom: 14px;
 }
 
-#progressText { 
-  font-size: 12px; 
-  color: #9ca3af; 
-  margin: 0; 
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 
-.stat-item { 
-  background: #111827; 
-  padding: 10px; 
-  border-radius: 10px; 
-  margin-bottom: 8px; 
-  display: flex; 
-  justify-content: space-between; 
-  font-size:14px; 
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280;
 }
 
-.stat-item b { 
-  color: #10b981; 
+textarea {
+  min-height: 75px;
+  resize: vertical;
 }
 
-.kalender-nav { 
-  display:flex; 
-  justify-content:space-between; 
-  align-items:center; 
-  margin-bottom:10px; 
+label {
+  display: block;
+  color: #d1d5db;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.kalender-nav button { 
-  width:40px; 
-  padding:6px; 
-  background:#374151; 
-  margin-top:0; 
+/* =====================================================
+   APP CONTAINER
+===================================================== */
+
+.app-container,
+.container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
 }
 
-.kalender-nav span { 
-  font-weight:bold; 
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header {
+  margin-bottom: 20px;
 }
 
-.kalender-grid { 
-  display: grid; 
-  grid-template-columns: repeat(7, 1fr); 
-  gap: 6px; 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
-.kalender-item { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center; 
-  padding: 8px 2px; 
-  min-height: 55px; 
-  font-size: 11px; 
-  border-radius: 10px; 
-  background: #374151; 
-  border: 1px solid #4b5563; 
-  cursor: pointer; 
+.header-top h1 {
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
-.kalender-item:hover { 
-  background: #4b5563; 
+.header-top p {
+  color: var(--muted);
+  font-size: 12px;
 }
 
-.kalender-item b { 
-  font-size: 15px; 
-  font-weight: bold; 
+.header-top select {
+  width: auto;
+  max-width: 125px;
+  padding: 9px;
+  margin: 0;
+  font-size: 12px;
 }
 
-.kalender-item small { 
-  font-size: 10px; 
-  color: #10b981; 
-  margin-top: 3px; 
+/* =====================================================
+   TOTAL GAJI
+===================================================== */
+
+.total-card,
+.card {
+  background: linear-gradient(135deg, #1e3a8a, #312e81);
+  padding: 22px;
+  border-radius: 17px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
 }
 
-.kalender-item.ada-kerja { 
-  border: 2px solid #10b981; 
-  background: #065f46; 
+.total-card p {
+  color: #bfdbfe;
+  font-size: 13px;
 }
 
-.tanggal-kosong { 
-  background: transparent; 
-  border: none; 
+.total-card h2 {
+  font-size: 31px;
+  margin: 7px 0 18px;
+  font-weight: 800;
+  word-break: break-word;
 }
 
-.popup { 
-  display:none; 
-  position:fixed; 
-  top:50%; 
-  left:50%; 
-  transform:translate(-50%,-50%); 
-  background:#1f2937; 
-  padding:20px; 
-  border-radius:16px; 
-  z-index:1000; 
-  width:90%; 
-  max-width:400px; 
-  max-height:70vh; 
-  overflow-y:auto 
+.target-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: #dbeafe;
+  margin-bottom: 8px;
 }
 
-#popupOverlay2 { 
-  display:none; 
-  position:fixed; 
-  top:0; 
-  left:0; 
-  width:100%; 
-  height:100%; 
-  background:rgba(0,0,0,0.7); 
-  z-index:999 
+.progress-container,
+.progress {
+  width: 100%;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
 }
 
-footer { 
-  text-align: center; 
-  color: #6b7280; 
-  font-size: 12px; 
-  margin-top: 20px; 
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #34d399;
+  border-radius: 20px;
+  transition: width 0.4s ease;
+}
+
+/* =====================================================
+   NAVIGASI BULAN
+===================================================== */
+
+.month-navigation,
+.kalender-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 15px;
+}
+
+.month-navigation h2,
+.kalender-nav h2 {
+  font-size: 17px;
+  text-align: center;
+}
+
+.month-navigation button,
+.kalender-nav button {
+  background: var(--card);
+  border: 1px solid var(--border);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-size: 17px;
+}
+
+/* =====================================================
+   KALENDER
+===================================================== */
+
+.calendar-section,
+.kalender-grid {
+  margin-bottom: 20px;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.calendar-weekdays div {
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 0;
+}
+
+.calendar-grid,
+.kalender-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.kalender-item,
+.calendar-day {
+  min-height: 65px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 7px 3px;
+  text-align: center;
+  font-size: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kalender-item:hover,
+.calendar-day:hover {
+  border-color: var(--blue);
+}
+
+.tanggal-kosong {
+  min-height: 65px;
+  background: transparent;
+}
+
+.ada-kerja {
+  border-color: var(--green);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.kalender-item .tanggal,
+.kalender-item .nomor-tanggal {
+  font-weight: 700;
+}
+
+.kalender-item .jumlah-gaji {
+  display: block;
+  color: #34d399;
+  font-size: 9px;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+.kalender-item small {
+  display: block;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.kalender-item.hari-ini,
+.calendar-day.today {
+  outline: 2px solid var(--blue);
+  outline-offset: -2px;
+}
+
+/* =====================================================
+   TOMBOL UTAMA
+===================================================== */
+
+.main-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.primary-button,
+.secondary-button,
+.backup-buttons button,
+.share-button {
+  width: 100%;
+  padding: 13px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.primary-button {
+  background: var(--blue);
+}
+
+.primary-button:hover {
+  background: var(--blue-dark);
+}
+
+.secondary-button {
+  background: var(--card-light);
+  border: 1px solid var(--border);
+}
+
+.secondary-button:hover {
+  background: #374151;
+}
+
+/* =====================================================
+   TARGET
+===================================================== */
+
+.target-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 16px;
+  margin: 18px 0;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.section-heading h3 {
+  font-size: 15px;
+}
+
+.section-heading button {
+  background: var(--blue);
+  border-radius: 8px;
+  padding: 8px 11px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.target-section p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* =====================================================
+   RINGKASAN KEUANGAN
+===================================================== */
+
+.finance-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.finance-section .section-heading {
+  margin-bottom: 15px;
+}
+
+.finance-section .section-heading h3 {
+  font-size: 16px;
+}
+
+.finance-section .section-heading button {
+  background: var(--green);
+  color: #052e22;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.finance-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.finance-summary-item {
+  background: #111827;
+  border: 1px solid var(--border);
+  padding: 13px;
+  border-radius: 11px;
+  min-width: 0;
+}
+
+.finance-summary-item span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+.finance-summary-item strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.net-summary {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #064e3b, #065f46);
+  border-color: #047857;
+  padding: 17px;
+}
+
+.net-summary span {
+  color: #a7f3d0;
+}
+
+.net-summary strong {
+  color: #6ee7b7;
+  font-size: 25px;
+}
+
+.detail-toggle-button {
+  width: 100%;
+  margin-top: 13px;
+  padding: 11px;
+  background: var(--card-light);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: #d1d5db;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.detail-toggle-button:hover {
+  background: #374151;
+}
+
+.finance-details {
+  margin-top: 13px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.expense-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.expense-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.expense-red {
+  color: #f87171 !important;
+}
+
+.net-salary {
+  color: #6ee7b7 !important;
+}
+
+.btn-expense {
+  background: var(--green);
+  color: #052e22;
+  border-radius: 9px;
+  padding: 10px 13px;
+  font-weight: 800;
+}
+
+.expense-details {
+  margin-top: 12px;
+}
+
+.expense-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.expense-item:last-child {
+  border-bottom: none;
+}
+
+.expense-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.expense-item-info strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.expense-item-info small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.expense-amount {
+  color: #f87171;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.expense-item-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.expense-item-actions button {
+  padding: 7px 9px;
+  border-radius: 7px;
+  font-size: 11px;
+  background: var(--card-light);
+}
+
+.expense-empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 18px 8px;
+  font-size: 12px;
+}
+
+/* =====================================================
+   BACKUP & DATA
+===================================================== */
+
+.backup-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 14px;
+  margin-top: 20px;
+}
+
+.backup-section h3 {
+  font-size: 15px;
+  margin-bottom: 13px;
+}
+
+.backup-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.backup-buttons button:first-child {
+  background: var(--purple);
+}
+
+.backup-buttons button:last-child {
+  background: #0891b2;
+}
+
+.share-button {
+  margin-top: 10px;
+  background: var(--green);
+  color: #052e22;
+}
+
+/* =====================================================
+   POPUP OVERLAY
+===================================================== */
+
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 1000;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.popup-overlay.active,
+.popup-overlay.show {
+  display: block;
+  opacity: 1;
+}
+
+/* =====================================================
+   POPUP / MODAL
+===================================================== */
+
+.popup {
+  display: none;
+  position: fixed;
+  z-index: 1001;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 30px);
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.popup.active,
+.popup.show {
+  display: block;
+  animation: popupMasuk 0.2s ease;
+}
+
+@keyframes popupMasuk {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -47%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.popup-header h3 {
+  font-size: 17px;
+}
+
+.popup-header button {
+  width: 31px;
+  height: 31px;
+  border-radius: 8px;
+  background: #374151;
+  color: white;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.popup-content {
+  width: 100%;
+}
+
+.popup-content .primary-button {
+  margin-top: 5px;
+}
+
+/* =====================================================
+   STATISTIK
+===================================================== */
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-item span {
+  color: var(--muted);
+}
+
+.stat-item strong {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* =====================================================
+   TOMBOL KECIL DAN HAPUS
+===================================================== */
+
+.btn-danger {
+  background: #dc2626;
+  padding: 8px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-kecil {
+  background: var(--blue);
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* =====================================================
+   DAFTAR LOKASI
+===================================================== */
+
+#isiDaftarLokasi > div,
+#isiPopupDetail > div {
+  background: #111827;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 9px;
+}
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.app-footer {
+  text-align: center;
+  padding: 25px 10px 15px;
+  color: #6b7280;
+  font-size: 11px;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 380px) {
+  .app-container,
+  .container {
+    padding: 11px;
+  }
+
+  .header-top h1 {
+    font-size: 20px;
+  }
+
+  .total-card h2 {
+    font-size: 26px;
+  }
+
+  .kalender-item,
+  .calendar-day,
+  .tanggal-kosong {
+    min-height: 55px;
+  }
+
+  .kalender-item .jumlah-gaji {
+    font-size: 8px;
+  }
+
+  .finance-summary-item strong {
+    font-size: 15px;
+  }
+
+  .net-summary strong {
+    font-size: 22px;
+  }
+
+  .main-actions {
+    gap: 7px;
+  }
+
+  .primary-button,
+  .secondary-button {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 600px) {
+  .app-container,
+  .container {
+    padding: 22px;
+  }
 }
